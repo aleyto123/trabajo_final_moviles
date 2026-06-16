@@ -7,23 +7,32 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.tecsup.agendacitasdeportivas.ui.screens.DetailScreen
+import com.tecsup.agendacitasdeportivas.ui.screens.FormScreen
+import com.tecsup.agendacitasdeportivas.ui.screens.ApiScreen
 import com.tecsup.agendacitasdeportivas.ui.screens.ListScreen
 import com.tecsup.agendacitasdeportivas.ui.viewmodel.ReservationViewModel
+import com.tecsup.agendacitasdeportivas.ui.viewmodel.ApiViewModel
 
 @Composable
-fun AppNavigation(viewModel: ReservationViewModel) {
+fun AppNavigation(reservationViewModel: ReservationViewModel, apiViewModel: ApiViewModel) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "list_screen") {
         composable("list_screen") {
-            ListScreen(navController, viewModel)
+            ListScreen(navController, reservationViewModel)
+        }
+        composable("form_screen") {
+            FormScreen(navController, reservationViewModel)
+        }
+        composable("api_screen") {
+            ApiScreen(navController, apiViewModel)
         }
         composable(
             route = "detail_screen/{id}",
-            arguments = listOf(navArgument("id") { type = NavType.IntType })
+            arguments = listOf(navArgument("id") { type = NavType.StringType })
         ) { backStackEntry ->
-            val id = backStackEntry.arguments?.getInt("id") ?: 0
-            DetailScreen(navController, viewModel, reservaId = id)
+            val id = backStackEntry.arguments?.getString("id") ?: ""
+            DetailScreen(navController, reservationViewModel, reservaId = id)
         }
     }
 }

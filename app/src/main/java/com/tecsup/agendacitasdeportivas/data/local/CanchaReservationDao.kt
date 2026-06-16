@@ -1,18 +1,17 @@
 package com.tecsup.agendacitasdeportivas.data.local
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CanchaReservationDao {
-    @Query("SELECT * FROM cancha_reservations")
+    @Query("SELECT * FROM table_cancha_reservations")
     fun getAllReservations(): Flow<List<CanchaReservationEntity>>
 
-    @Insert
+    @Query("SELECT * FROM table_cancha_reservations WHERE id = :id")
+    suspend fun getReservationById(id: String): CanchaReservationEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(reservation: CanchaReservationEntity)
 
     @Update

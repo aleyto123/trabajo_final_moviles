@@ -6,6 +6,7 @@ import com.tecsup.agendacitasdeportivas.data.network.RetrofitClient
 import com.tecsup.agendacitasdeportivas.data.network.WeatherResponse
 import com.tecsup.agendacitasdeportivas.data.network.GeminiResponse
 import kotlinx.coroutines.flow.Flow
+import java.net.UnknownHostException
 
 class CanchaReservationRepository(
     private val canchaReservationDao: CanchaReservationDao
@@ -13,6 +14,10 @@ class CanchaReservationRepository(
     // --- PERSISTENCIA LOCAL (ROOM) ---
     val allReservations: Flow<List<CanchaReservationEntity>> =
         canchaReservationDao.getAllReservations()
+
+    suspend fun getReservationById(id: String): CanchaReservationEntity? {
+        return canchaReservationDao.getReservationById(id)
+    }
 
     suspend fun insertReservation(reservation: CanchaReservationEntity) {
         canchaReservationDao.insert(reservation)
@@ -26,27 +31,31 @@ class CanchaReservationRepository(
         canchaReservationDao.delete(reservation)
     }
 
-    // --- CONSUMO DE API CON PROTECCIÓN TRY-CATCH ---
-    suspend fun fetchWeather(lat: Double, lon: Double): WeatherResponse? {
+    // --- CONSUMO DE API CON PROTECCIÓN TRY-CATCH ROBUSTO ---
+    suspend fun fetchWeather(lat: Double, lon: Double): Result<WeatherResponse> {
         return try {
-            RetrofitClient.weatherApi.getWeather(lat, lon)
+            val response = RetrofitClient.weatherApi.getWeather(lat, lon)
+            Result.success(response)
+        } catch (e: UnknownHostException) {
+            Result.failure(Exception("No hay conexión a internet. Verifique su red."))
         } catch (e: Exception) {
-            e.printStackTrace()
-            null // Retorna null si no hay internet o falla el servidor
+            Result.failure(Exception("Error al obtener el clima: ${e.localizedMessage}"))
         }
     }
 
-    suspend fun askGemini(apiKey: String, prompt: String): GeminiResponse? {
+    suspend fun askGemini(apiKey: String, prompt: String): Result<GeminiResponse> {
         return try {
             val requestBody = mapOf(
                 "contents" to listOf(
                     mapOf("parts" to listOf(mapOf("text" to prompt)))
                 )
             )
-            RetrofitClient.geminiApi.generateContent(apiKey, requestBody)
+            val response = RetrofitClient.geminiApi.generateContent(apiKey, requestBody)
+            Result.success(response)
+        } catch (e: UnknownHostException) {
+            Result.failure(Exception("No hay conexión a internet para contactar a la IA."))
         } catch (e: Exception) {
-            e.printStackTrace()
-            null
+            Result.failure(Exception("Error de IA: ${e.localizedMessage}"))
         }
     }
 }
