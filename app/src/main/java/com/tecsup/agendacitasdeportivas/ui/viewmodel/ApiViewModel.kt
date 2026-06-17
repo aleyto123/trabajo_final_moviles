@@ -2,7 +2,7 @@ package com.tecsup.agendacitasdeportivas.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tecsup.agendacitasdeportivas.data.network.ChatResponse
+import com.tecsup.agendacitasdeportivas.data.network.GroqResponse
 import com.tecsup.agendacitasdeportivas.data.network.WeatherResponse
 import com.tecsup.agendacitasdeportivas.data.repository.CanchaReservationRepository
 import com.tecsup.agendacitasdeportivas.ui.state.ApiUiState
@@ -15,13 +15,13 @@ class ApiViewModel(
     private val repository: CanchaReservationRepository
 ) : ViewModel() {
 
-    private val CHAT_TOKEN = ""
+    private val GROQ_TOKEN = ""
 
     private val _weatherState = MutableStateFlow<ApiUiState<WeatherResponse>>(ApiUiState.Idle)
     val weatherState: StateFlow<ApiUiState<WeatherResponse>> = _weatherState.asStateFlow()
 
-    private val _chatState = MutableStateFlow<ApiUiState<ChatResponse>>(ApiUiState.Idle)
-    val chatState: StateFlow<ApiUiState<ChatResponse>> = _chatState.asStateFlow()
+    private val _groqState = MutableStateFlow<ApiUiState<GroqResponse>>(ApiUiState.Idle)
+    val groqState: StateFlow<ApiUiState<GroqResponse>> = _groqState.asStateFlow()
 
     fun fetchWeather(lat: Double, lon: Double) {
         viewModelScope.launch {
@@ -78,13 +78,13 @@ class ApiViewModel(
         """.trimIndent()
 
         viewModelScope.launch {
-            _chatState.value = ApiUiState.Loading
-            repository.askChatBot(CHAT_TOKEN, "$context \nUsuario: $prompt").fold(
+            _groqState.value = ApiUiState.Loading
+            repository.askGroq(GROQ_TOKEN, "$context \nUsuario: $prompt").fold(
                 onSuccess = { response ->
-                    _chatState.value = ApiUiState.Success(response)
+                    _groqState.value = ApiUiState.Success(response)
                 },
                 onFailure = { error ->
-                    _chatState.value = ApiUiState.Error(error.message ?: "Error desconocido")
+                    _groqState.value = ApiUiState.Error(error.message ?: "Error desconocido")
                 }
             )
         }

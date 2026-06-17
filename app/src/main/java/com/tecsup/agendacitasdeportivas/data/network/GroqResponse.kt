@@ -2,12 +2,12 @@ package com.tecsup.agendacitasdeportivas.data.network
 
 import com.google.gson.annotations.SerializedName
 
-data class ChatResponse(
+data class GroqResponse(
     @SerializedName("choices")
-    val choices: List<Choice>
+    val choices: List<GroqChoice>
 )
 
-data class Choice(
+data class GroqChoice(
     @SerializedName("message")
-    val message: ChatMessage
+    val message: GroqMessage
 )

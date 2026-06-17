@@ -1,12 +1,11 @@
 package com.tecsup.agendacitasdeportivas.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
@@ -24,7 +23,7 @@ import com.tecsup.agendacitasdeportivas.ui.viewmodel.ApiViewModel
 @Composable
 fun ApiScreen(navController: NavController, viewModel: ApiViewModel) {
     val weatherState by viewModel.weatherState.collectAsState()
-    val chatState by viewModel.chatState.collectAsState()
+    val groqState by viewModel.groqState.collectAsState()
     var prompt by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
 
@@ -35,10 +34,10 @@ fun ApiScreen(navController: NavController, viewModel: ApiViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Asistente ChatBot") },
+                title = { Text("Asistente ChatBot (Groq)") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 },
                 actions = {
@@ -54,7 +53,7 @@ fun ApiScreen(navController: NavController, viewModel: ApiViewModel) {
                 .padding(padding)
                 .fillMaxSize()
         ) {
-            // Sección del Clima (Requerimiento 5: Mapear estado Retrofit)
+            // Sección del Clima
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -84,7 +83,7 @@ fun ApiScreen(navController: NavController, viewModel: ApiViewModel) {
                 }
             }
 
-            // Sección del Asistente IA (Chat)
+            // Sección del ChatBot
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -94,7 +93,7 @@ fun ApiScreen(navController: NavController, viewModel: ApiViewModel) {
                 Text("ChatBot - Consultas", style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(8.dp))
 
-                when (val state = chatState) {
+                when (val state = groqState) {
                     is ApiUiState.Loading -> LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                     is ApiUiState.Success -> {
                         val response = state.data.choices.firstOrNull()?.message?.content ?: "Sin respuesta"
@@ -107,7 +106,7 @@ fun ApiScreen(navController: NavController, viewModel: ApiViewModel) {
                         }
                     }
                     is ApiUiState.Error -> {
-                        Text("Error ChatBot: ${state.message}", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                        Text("Error: ${state.message}", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
                     }
                     else -> {
                         Text("Hola, soy tu asesor. Pregúntame sobre canchas, precios o recomendaciones según el clima.", color = Color.Gray)
@@ -133,7 +132,7 @@ fun ApiScreen(navController: NavController, viewModel: ApiViewModel) {
                                 prompt = ""
                             }
                         },
-                        enabled = prompt.isNotBlank() && chatState !is ApiUiState.Loading
+                        enabled = prompt.isNotBlank() && groqState !is ApiUiState.Loading
                     ) {
                         Icon(Icons.Default.Send, contentDescription = "Enviar")
                     }

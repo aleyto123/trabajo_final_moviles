@@ -16,12 +16,12 @@ object RetrofitClient {
             .create(WeatherApiService::class.java)
     }
 
-    val chatApi: ChatApiService by lazy {
+    val groqApi: GroqApiService by lazy {
         Retrofit.Builder()
             .baseUrl("https://api.groq.com/openai/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(ChatApiService::class.java)
+            .create(GroqApiService::class.java)
     }
 }
