@@ -1,41 +1,25 @@
 package com.tecsup.agendacitasdeportivas.ui.screens
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.tecsup.agendacitasdeportivas.data.model.CanchaProvider
 import com.tecsup.agendacitasdeportivas.ui.viewmodel.ReservationViewModel
-import com.tecsup.agendacitasdeportivas.ui.viewmodel.DetailUiState
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DetailScreen(
-    navController: NavController, 
-    viewModel: ReservationViewModel, 
-    id: String, 
-    isCancha: Boolean
-) {
-    if (isCancha) {
-        CanchaDetailContent(navController, id)
-    } else {
-        ReservationDetailContent(navController, viewModel, id)
-    }
-}
+import com.tecsup.agendacitasdeportivas.ui.state.DetailUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,7 +32,7 @@ fun CanchaDetailContent(navController: NavController, canchaId: String) {
                 title = { Text("Detalles de la Cancha") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 }
             )
@@ -60,20 +44,14 @@ fun CanchaDetailContent(navController: NavController, canchaId: String) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            // Hero section (Simulated image)
-            Box(
+            Image(
+                painter = painterResource(id = cancha.imageRes),
+                contentDescription = "Imagen de ${cancha.name}",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary)
-                        )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.Star, contentDescription = null, tint = Color.White, modifier = Modifier.size(80.dp))
-            }
+                    .height(200.dp),
+                contentScale = ContentScale.Crop
+            )
 
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(cancha.name, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
@@ -138,13 +116,15 @@ fun ReservationDetailContent(navController: NavController, viewModel: Reservatio
                 title = { Text("Mi Reserva") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 }
             )
         }
     ) { padding ->
-        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+        Box(modifier = Modifier
+            .padding(padding)
+            .fillMaxSize()) {
             when (val state = detailState) {
                 is DetailUiState.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
                 is DetailUiState.Error -> Text("Error: ${state.message}", Modifier.align(Alignment.Center), color = MaterialTheme.colorScheme.error)
@@ -160,15 +140,31 @@ fun ReservationDetailContent(navController: NavController, viewModel: Reservatio
                                 Text("Fecha: ${r.reservationDate}")
                                 Text("Hora: ${r.reservationTime}")
                                 Text("Total Pagado: S/. ${r.hourlyPrice}")
+                                Text("Estado: ${r.paymentStatus}", color = if(r.paymentStatus == "Completado") Color(0xFF2E7D32) else Color.Red)
                             }
                         }
                         Spacer(modifier = Modifier.height(24.dp))
+                        
+                        Button(
+                            onClick = { 
+                                navController.navigate("edit_screen/${r.id}")
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Modificar Reserva (Actualizar)")
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         OutlinedButton(
-                            onClick = { /* Lógica para cancelar si se desea */ },
+                            onClick = { 
+                                viewModel.delete(r)
+                                navController.popBackStack()
+                            },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                         ) {
-                            Text("Cancelar Reserva")
+                            Text("Cancelar Reserva (Eliminar)")
                         }
                     }
                 }

@@ -1,18 +1,17 @@
 package com.tecsup.agendacitasdeportivas.ui.screens
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -33,7 +32,9 @@ fun CanchaListScreen(navController: NavController) {
             )
         }
     ) { padding ->
-        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+        Box(modifier = Modifier
+            .padding(padding)
+            .fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 100.dp, start = 16.dp, end = 16.dp, top = 16.dp),
@@ -52,20 +53,14 @@ fun CanchaListScreen(navController: NavController) {
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
                         Column {
-                            // Header simulado
-                            Box(
+                            Image(
+                                painter = painterResource(id = cancha.imageRes),
+                                contentDescription = "Imagen de ${cancha.name}",
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(120.dp)
-                                    .background(
-                                        Brush.horizontalGradient(
-                                            colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary)
-                                        )
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(Icons.Default.Info, contentDescription = null, tint = Color.White, modifier = Modifier.size(48.dp))
-                            }
+                                    .height(150.dp),
+                                contentScale = ContentScale.Crop
+                            )
                             
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(cancha.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)

@@ -1,7 +1,6 @@
 package com.tecsup.agendacitasdeportivas.ui.screens
 
 import android.app.DatePickerDialog
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -13,7 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,8 +23,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.tecsup.agendacitasdeportivas.data.local.CanchaReservationEntity
 import com.tecsup.agendacitasdeportivas.data.model.CanchaProvider
+import com.tecsup.agendacitasdeportivas.ui.state.DetailUiState
 import com.tecsup.agendacitasdeportivas.ui.state.ReservationUiState
 import com.tecsup.agendacitasdeportivas.ui.viewmodel.ReservationViewModel
 import java.text.SimpleDateFormat
@@ -33,18 +32,35 @@ import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FormScreen(navController: NavController, viewModel: ReservationViewModel, canchaId: String) {
-    val cancha = CanchaProvider.allCanchas.find { it.id == canchaId } ?: return
+fun FormScreen(
+    navController: NavController, 
+    viewModel: ReservationViewModel, 
+    canchaId: String,
+    editId: String? = null
+) {
     var errorMessage by remember { mutableStateOf("") }
     val context = LocalContext.current
-    
-    LaunchedEffect(Unit) {
-        viewModel.canchaType = cancha.name
-        viewModel.hourlyPrice = cancha.pricePerHour
-    }
-
     val reservationsState by viewModel.uiState.collectAsState()
     val existingReservations = (reservationsState as? ReservationUiState.Success)?.reservations ?: emptyList()
+
+    LaunchedEffect(editId, canchaId) {
+        if (editId != null) {
+            // Modo Edición
+            val reservation = existingReservations.find { it.id == editId }
+            if (reservation != null) {
+                val cancha = CanchaProvider.allCanchas.find { it.name == reservation.canchaType }
+                viewModel.prepareFormForEdit(reservation, cancha?.pricePerHour ?: 0.0)
+            }
+        } else {
+            // Modo Creación
+            val cancha = CanchaProvider.allCanchas.find { it.id == canchaId }
+            if (cancha != null) {
+                viewModel.clearForm()
+                viewModel.canchaType = cancha.name
+                viewModel.hourlyPrice = cancha.pricePerHour
+            }
+        }
+    }
 
     // DatePickerDialog Logic
     val calendar = Calendar.getInstance()
@@ -66,10 +82,10 @@ fun FormScreen(navController: NavController, viewModel: ReservationViewModel, ca
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Reserva: ${cancha.name}") },
+                title = { Text(if (editId == null) "Nueva Reserva" else "Editar Reserva") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 }
             )
@@ -82,7 +98,10 @@ fun FormScreen(navController: NavController, viewModel: ReservationViewModel, ca
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            Text("Complete los datos para su cita", style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = if (editId == null) "Complete los datos para su cita" else "Modifique los datos de su cita", 
+                style = MaterialTheme.typography.titleMedium
+            )
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
@@ -94,7 +113,6 @@ fun FormScreen(navController: NavController, viewModel: ReservationViewModel, ca
 
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Campo de Fecha con InteractionSource para abrir Picker al tocar
             val dateInteractionSource = remember { MutableInteractionSource() }
             LaunchedEffect(dateInteractionSource) {
                 dateInteractionSource.interactions.collect {
@@ -117,13 +135,11 @@ fun FormScreen(navController: NavController, viewModel: ReservationViewModel, ca
 
             Spacer(modifier = Modifier.height(24.dp))
             
-            Text("Seleccione las Horas (Puede marcar varias)", fontWeight = FontWeight.Bold)
-            Text("Total horas: ${viewModel.selectedTimes.size}", style = MaterialTheme.typography.bodySmall)
+            Text("Seleccione las Horas", fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
 
             val timeSlots = listOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00")
             
-            // Usamos un Box con altura fija para evitar conflictos de scroll
             Box(modifier = Modifier.height(250.dp)) {
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(100.dp),
@@ -133,6 +149,7 @@ fun FormScreen(navController: NavController, viewModel: ReservationViewModel, ca
                 ) {
                     items(timeSlots, key = { it }) { time ->
                         val isOccupied = existingReservations.any { 
+                            it.id != editId && // Ignorar la propia reserva si estamos editando
                             it.reservationDate == viewModel.reservationDate && 
                             it.reservationTime.contains(time) && 
                             it.canchaType == viewModel.canchaType
@@ -158,7 +175,7 @@ fun FormScreen(navController: NavController, viewModel: ReservationViewModel, ca
 
             Spacer(modifier = Modifier.height(24.dp))
             
-            val totalPrice = cancha.pricePerHour * viewModel.selectedTimes.size
+            val totalPrice = viewModel.hourlyPrice * viewModel.selectedTimes.size
             
             Text("Resumen de Pago", fontWeight = FontWeight.Bold)
             Card(
@@ -185,18 +202,16 @@ fun FormScreen(navController: NavController, viewModel: ReservationViewModel, ca
             Button(
                 onClick = {
                     if (viewModel.isFormValid) {
-                        viewModel.insert()
-                        navController.navigate("list_screen") {
-                            popUpTo("list_screen") { inclusive = true }
-                        }
+                        viewModel.save()
+                        navController.popBackStack()
                     } else {
-                        errorMessage = "Complete nombre, fecha y al menos una hora."
+                        errorMessage = "Complete todos los campos."
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Confirmar Reserva")
+                Text(if (editId == null) "Confirmar Reserva" else "Guardar Cambios")
             }
         }
     }

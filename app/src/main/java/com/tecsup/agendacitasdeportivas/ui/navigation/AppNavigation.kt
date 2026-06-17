@@ -26,7 +26,14 @@ fun AppNavigation(reservationViewModel: ReservationViewModel, apiViewModel: ApiV
             arguments = listOf(navArgument("canchaId") { type = NavType.StringType })
         ) { backStackEntry ->
             val canchaId = backStackEntry.arguments?.getString("canchaId") ?: ""
-            FormScreen(navController, reservationViewModel, canchaId = canchaId)
+            FormScreen(navController, reservationViewModel, canchaId = canchaId, editId = null)
+        }
+        composable(
+            route = "edit_screen/{reservationId}",
+            arguments = listOf(navArgument("reservationId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val resId = backStackEntry.arguments?.getString("reservationId") ?: ""
+            FormScreen(navController, reservationViewModel, canchaId = "", editId = resId)
         }
         composable("api_screen") {
             ApiScreen(navController, apiViewModel)

@@ -8,15 +8,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecsup.agendacitasdeportivas.data.local.CanchaReservationEntity
 import com.tecsup.agendacitasdeportivas.data.repository.CanchaReservationRepository
+import com.tecsup.agendacitasdeportivas.ui.state.DetailUiState
 import com.tecsup.agendacitasdeportivas.ui.state.ReservationUiState
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-
-sealed interface DetailUiState {
-    object Loading : DetailUiState
-    data class Success(val reservation: CanchaReservationEntity) : DetailUiState
-    data class Error(val message: String) : DetailUiState
-}
 
 class ReservationViewModel(
     private val repository: CanchaReservationRepository
@@ -46,6 +41,8 @@ class ReservationViewModel(
     var selectedTimes by mutableStateOf(setOf<String>())
     var hourlyPrice by mutableDoubleStateOf(0.0)
     var paymentStatus by mutableStateOf("Pendiente")
+    
+    var editingReservationId by mutableStateOf<String?>(null)
 
     // Validación básica
     val isFormValid: Boolean
@@ -69,6 +66,17 @@ class ReservationViewModel(
         selectedTimes = emptySet()
         hourlyPrice = 0.0
         paymentStatus = "Pendiente"
+        editingReservationId = null
+    }
+
+    fun prepareFormForEdit(reservation: CanchaReservationEntity, baseHourlyPrice: Double) {
+        editingReservationId = reservation.id
+        customerName = reservation.customerName
+        canchaType = reservation.canchaType
+        reservationDate = reservation.reservationDate
+        selectedTimes = reservation.reservationTime.split(", ").toSet()
+        hourlyPrice = baseHourlyPrice
+        paymentStatus = reservation.paymentStatus
     }
 
     fun loadReservation(id: String) {
@@ -87,11 +95,12 @@ class ReservationViewModel(
         }
     }
 
-    fun insert() {
+    fun save() {
         if (!isFormValid) return
         viewModelScope.launch {
             try {
                 val reservation = CanchaReservationEntity(
+                    id = editingReservationId ?: java.util.UUID.randomUUID().toString(),
                     userId = "USER_DEFAULT",
                     canchaType = canchaType,
                     customerName = customerName,
@@ -100,7 +109,11 @@ class ReservationViewModel(
                     hourlyPrice = hourlyPrice * selectedTimes.size,
                     paymentStatus = paymentStatus
                 )
-                repository.insertReservation(reservation)
+                if (editingReservationId == null) {
+                    repository.insertReservation(reservation)
+                } else {
+                    repository.updateReservation(reservation)
+                }
                 clearForm()
             } catch (e: Exception) {
                 // Error handled by repository abstraction ideally

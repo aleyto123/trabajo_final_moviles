@@ -7,3 +7,9 @@ sealed interface ReservationUiState {
     data class Success(val reservations: List<CanchaReservationEntity>) : ReservationUiState
     data class Error(val message: String) : ReservationUiState
 }
+
+sealed interface DetailUiState {
+    object Loading : DetailUiState
+    data class Success(val reservation: CanchaReservationEntity) : DetailUiState
+    data class Error(val message: String) : DetailUiState
+}

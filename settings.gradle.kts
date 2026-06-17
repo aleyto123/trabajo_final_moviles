@@ -22,5 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
+// Triggering a re-sync to restore Android view
 rootProject.name = "AgendaCitasDeportivas"
 include(":app")
