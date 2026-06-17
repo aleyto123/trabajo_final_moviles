@@ -6,10 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.tecsup.agendacitasdeportivas.ui.screens.DetailScreen
-import com.tecsup.agendacitasdeportivas.ui.screens.FormScreen
-import com.tecsup.agendacitasdeportivas.ui.screens.ApiScreen
-import com.tecsup.agendacitasdeportivas.ui.screens.ListScreen
+import com.tecsup.agendacitasdeportivas.ui.screens.*
 import com.tecsup.agendacitasdeportivas.ui.viewmodel.ReservationViewModel
 import com.tecsup.agendacitasdeportivas.ui.viewmodel.ApiViewModel
 
@@ -17,12 +14,19 @@ import com.tecsup.agendacitasdeportivas.ui.viewmodel.ApiViewModel
 fun AppNavigation(reservationViewModel: ReservationViewModel, apiViewModel: ApiViewModel) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "list_screen") {
+    NavHost(navController = navController, startDestination = "cancha_list") {
+        composable("cancha_list") {
+            CanchaListScreen(navController)
+        }
         composable("list_screen") {
             ListScreen(navController, reservationViewModel)
         }
-        composable("form_screen") {
-            FormScreen(navController, reservationViewModel)
+        composable(
+            route = "form_screen/{canchaId}",
+            arguments = listOf(navArgument("canchaId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val canchaId = backStackEntry.arguments?.getString("canchaId") ?: ""
+            FormScreen(navController, reservationViewModel, canchaId = canchaId)
         }
         composable("api_screen") {
             ApiScreen(navController, apiViewModel)
@@ -32,7 +36,17 @@ fun AppNavigation(reservationViewModel: ReservationViewModel, apiViewModel: ApiV
             arguments = listOf(navArgument("id") { type = NavType.StringType })
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id") ?: ""
-            DetailScreen(navController, reservationViewModel, reservaId = id)
+            ReservationDetailContent(navController, reservationViewModel, id = id)
+        }
+        composable(
+            route = "cancha_detail/{id}",
+            arguments = listOf(navArgument("id") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: ""
+            CanchaDetailContent(navController, id)
+        }
+        composable("statistics_screen") {
+            StatisticsScreen(navController, reservationViewModel)
         }
     }
 }

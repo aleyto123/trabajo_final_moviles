@@ -1,16 +1,13 @@
 package com.tecsup.agendacitasdeportivas
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
@@ -35,15 +32,13 @@ class MainActivity : ComponentActivity() {
             // 3. Factory para ViewModels
             val factory = object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    if (modelClass.isAssignableFrom(ReservationViewModel::class.java)) {
-                        @Suppress("UNCHECKED_CAST")
-                        return ReservationViewModel(repository) as T
+                    return when {
+                        modelClass.isAssignableFrom(ReservationViewModel::class.java) -> 
+                            ReservationViewModel(repository) as T
+                        modelClass.isAssignableFrom(ApiViewModel::class.java) -> 
+                            ApiViewModel(repository) as T
+                        else -> throw IllegalArgumentException("Clase ViewModel desconocida")
                     }
-                    if (modelClass.isAssignableFrom(ApiViewModel::class.java)) {
-                        @Suppress("UNCHECKED_CAST")
-                        return ApiViewModel(repository) as T
-                    }
-                    throw IllegalArgumentException("Clase ViewModel desconocida")
                 }
             }
 
@@ -51,17 +46,20 @@ class MainActivity : ComponentActivity() {
             val apiViewModel = ViewModelProvider(this, factory)[ApiViewModel::class.java]
 
             setContent {
-                Box(modifier = Modifier.fillMaxSize().background(Color.Blue), contentAlignment = Alignment.Center) {
-                    Text("DEBUG: Si ves esto en azul, Compose funciona", color = Color.White)
+                AgendaCitasDeportivasTheme {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        AppNavigation(reservationViewModel, apiViewModel)
+                    }
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.e("MainActivity", "Error en onCreate", e)
+            Log.e("MainActivity", "Error en onCreate", e)
             setContent {
-                MaterialTheme {
-                    Surface(modifier = Modifier.fillMaxSize(), color = Color.Red) {
-                        Text("ERROR CRÍTICO: ${e.message}")
-                    }
+                Surface(modifier = Modifier.fillMaxSize(), color = Color.Red) {
+                    Text("ERROR CRÍTICO: ${e.message}\nConsulte Logcat para más detalles.")
                 }
             }
         }

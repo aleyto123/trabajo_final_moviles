@@ -1,12 +1,20 @@
 package com.tecsup.agendacitasdeportivas.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.tecsup.agendacitasdeportivas.ui.state.ApiUiState
@@ -16,94 +24,120 @@ import com.tecsup.agendacitasdeportivas.ui.viewmodel.ApiViewModel
 @Composable
 fun ApiScreen(navController: NavController, viewModel: ApiViewModel) {
     val weatherState by viewModel.weatherState.collectAsState()
-    val geminiState by viewModel.geminiState.collectAsState()
+    val chatState by viewModel.chatState.collectAsState()
     var prompt by remember { mutableStateOf("") }
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
-        viewModel.fetchWeather(-12.04, -77.03)
+        viewModel.fetchWeather(-12.04, -77.03) // Lima
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Clima y Asistente") }) }
+        topBar = {
+            TopAppBar(
+                title = { Text("Asistente ChatBot") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = null)
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { viewModel.fetchWeather(-12.04, -77.03) }) {
+                        Icon(Icons.Default.Refresh, contentDescription = null)
+                    }
+                }
+            )
+        }
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(16.dp)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
         ) {
-            Text("Estado del Clima (Lima)", style = MaterialTheme.typography.titleLarge)
-            Spacer(modifier = Modifier.height(16.dp))
-
-            when (val state = weatherState) {
-                is ApiUiState.Loading -> {
-                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                }
-                is ApiUiState.Success -> {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Temperatura Actual: ${state.data.current_weather.temperature}°C", style = MaterialTheme.typography.headlineSmall)
-                            Text("Código de Clima: ${state.data.current_weather.weathercode}")
-                        }
-                    }
-                }
-                is ApiUiState.Error -> {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                        Text(state.message, color = MaterialTheme.colorScheme.error)
-                        Button(onClick = { viewModel.fetchWeather(-12.04, -77.03) }) {
-                            Text("Reintentar")
-                        }
-                    }
-                }
-                is ApiUiState.Idle -> {}
-            }
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 24.dp))
-
-            Text("Asistente IA", style = MaterialTheme.typography.titleLarge)
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                value = prompt,
-                onValueChange = { prompt = it },
-                label = { Text("Duda sobre reservas...") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Button(
-                onClick = {
-                    viewModel.askGemini("LLAVE KEY DE LA API DEL BOT", prompt)
-                },
-                modifier = Modifier.fillMaxWidth()
+            // Sección del Clima (Requerimiento 5: Mapear estado Retrofit)
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             ) {
-                Text("Consultar IA")
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Estado del Clima (Lima)", style = MaterialTheme.typography.labelLarge)
+                    when (val state = weatherState) {
+                        is ApiUiState.Loading -> CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        is ApiUiState.Success -> {
+                            Text(
+                                text = "${state.data.current_weather.temperature}°C",
+                                style = MaterialTheme.typography.headlineLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text("Ideal para agendar tus citas hoy.")
+                        }
+                        is ApiUiState.Error -> {
+                            Text("Error: ${state.message}", color = MaterialTheme.colorScheme.error)
+                            Button(onClick = { viewModel.fetchWeather(-12.04, -77.03) }) {
+                                Text("Reintentar")
+                            }
+                        }
+                        else -> {}
+                    }
+                }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // Sección del Asistente IA (Chat)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(scrollState)
+            ) {
+                Text("ChatBot - Consultas", style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.height(8.dp))
 
-            when (val state = geminiState) {
-                is ApiUiState.Loading -> {
-                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                when (val state = chatState) {
+                    is ApiUiState.Loading -> LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    is ApiUiState.Success -> {
+                        val response = state.data.choices.firstOrNull()?.message?.content ?: "Sin respuesta"
+                        Card(
+                            shape = RoundedCornerShape(8.dp, 16.dp, 16.dp, 16.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+                            modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth()
+                        ) {
+                            Text(response, modifier = Modifier.padding(12.dp))
+                        }
+                    }
+                    is ApiUiState.Error -> {
+                        Text("Error ChatBot: ${state.message}", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                    }
+                    else -> {
+                        Text("Hola, soy tu asesor. Pregúntame sobre canchas, precios o recomendaciones según el clima.", color = Color.Gray)
                     }
                 }
-                is ApiUiState.Success -> {
-                    val respuesta = state.data.candidates.firstOrNull()?.content?.parts?.firstOrNull()?.text ?: "Sin respuesta."
-                    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
-                        Text(
-                            text = respuesta,
-                            modifier = Modifier.padding(16.dp),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+            }
+
+            // Input de Chat
+            Surface(tonalElevation = 4.dp, modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedTextField(
+                        value = prompt,
+                        onValueChange = { prompt = it },
+                        placeholder = { Text("Escribe aquí...") },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(
+                        onClick = {
+                            if (prompt.isNotBlank()) {
+                                viewModel.askChatBot(prompt)
+                                prompt = ""
+                            }
+                        },
+                        enabled = prompt.isNotBlank() && chatState !is ApiUiState.Loading
+                    ) {
+                        Icon(Icons.Default.Send, contentDescription = "Enviar")
                     }
                 }
-                is ApiUiState.Error -> {
-                    Text(state.message, color = MaterialTheme.colorScheme.error)
-                }
-                else -> Text("Esperando consulta...", color = MaterialTheme.colorScheme.outline)
             }
         }
     }

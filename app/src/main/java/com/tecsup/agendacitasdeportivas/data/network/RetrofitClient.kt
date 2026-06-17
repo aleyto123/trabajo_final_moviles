@@ -16,12 +16,12 @@ object RetrofitClient {
             .create(WeatherApiService::class.java)
     }
 
-    val geminiApi: GeminiApiService by lazy {
+    val chatApi: ChatApiService by lazy {
         Retrofit.Builder()
-            .baseUrl("https://generativelanguage.googleapis.com/")
+            .baseUrl("https://api.groq.com/openai/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(GeminiApiService::class.java)
+            .create(ChatApiService::class.java)
     }
 }

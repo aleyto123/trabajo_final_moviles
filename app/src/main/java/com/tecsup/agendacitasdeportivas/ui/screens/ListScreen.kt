@@ -5,14 +5,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.tecsup.agendacitasdeportivas.ui.viewmodel.ReservationViewModel
@@ -26,53 +25,41 @@ fun ListScreen(navController: NavController, viewModel: ReservationViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Mis Reservas") },
+                title = { Text("Historial de Reservas") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar")
+                    }
+                },
                 actions = {
-                    IconButton(onClick = { navController.navigate("api_screen") }) {
-                        Icon(Icons.Default.Info, contentDescription = "Clima e IA")
+                    IconButton(onClick = { navController.navigate("statistics_screen") }) {
+                        Icon(Icons.Default.Info, contentDescription = "Estadísticas")
                     }
                 }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate("form_screen") }) {
-                Icon(Icons.Default.Add, contentDescription = "Nueva Reserva")
-            }
         }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
+        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             when (val state = uiState) {
-                is ReservationUiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            CircularProgressIndicator()
-                            Text("Cargando reservas...")
-                        }
-                    }
-                }
-                is ReservationUiState.Error -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Error: ${state.message}", color = MaterialTheme.colorScheme.error)
-                    }
-                }
+                is ReservationUiState.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+                is ReservationUiState.Error -> Text("Error: ${state.message}", Modifier.align(Alignment.Center))
                 is ReservationUiState.Success -> {
                     if (state.reservations.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("No hay reservas. Toca + para añadir.")
-                        }
+                        Text("No hay reservas registradas.", Modifier.align(Alignment.Center))
                     } else {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(state.reservations) { reserva ->
+                            items(state.reservations) { reservation ->
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(8.dp)
-                                        .clickable { navController.navigate("detail_screen/${reserva.id}") }
+                                        .clickable { navController.navigate("detail_screen/${reservation.id}") }
                                 ) {
                                     Column(modifier = Modifier.padding(16.dp)) {
-                                        Text(text = "Cancha: ${reserva.canchaType}", style = MaterialTheme.typography.titleMedium)
-                                        Text(text = "Cliente: ${reserva.customerName}")
-                                        Text(text = "Fecha: ${reserva.reservationDate}")
+                                        Text(text = reservation.canchaType, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                        Text(text = "Cliente: ${reservation.customerName}")
+                                        Text(text = "Fecha: ${reservation.reservationDate}")
+                                        Text(text = "Horas: ${reservation.reservationTime}")
                                     }
                                 }
                             }
@@ -80,6 +67,7 @@ fun ListScreen(navController: NavController, viewModel: ReservationViewModel) {
                     }
                 }
             }
+            ChatBotBubble(navController)
         }
     }
 }

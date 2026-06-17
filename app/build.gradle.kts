@@ -63,10 +63,10 @@ dependencies {
     // ViewModel Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.3")
 
-    // Room (Persistencia Local)
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    "kapt"("androidx.room:room-compiler:2.6.1")
+    // Room (Persistencia Local) - Actualizado a 2.7.0-rc01 para compatibilidad con Kotlin 2.1
+    implementation("androidx.room:room-runtime:2.7.0-rc01")
+    implementation("androidx.room:room-ktx:2.7.0-rc01")
+    "kapt"("androidx.room:room-compiler:2.7.0-rc01")
 
     // Retrofit y OkHttp (APIs)
     implementation("com.squareup.retrofit2:retrofit:2.11.0")

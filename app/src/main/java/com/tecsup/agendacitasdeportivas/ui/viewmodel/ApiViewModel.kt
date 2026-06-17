@@ -2,7 +2,7 @@ package com.tecsup.agendacitasdeportivas.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tecsup.agendacitasdeportivas.data.network.GeminiResponse
+import com.tecsup.agendacitasdeportivas.data.network.ChatResponse
 import com.tecsup.agendacitasdeportivas.data.network.WeatherResponse
 import com.tecsup.agendacitasdeportivas.data.repository.CanchaReservationRepository
 import com.tecsup.agendacitasdeportivas.ui.state.ApiUiState
@@ -15,11 +15,13 @@ class ApiViewModel(
     private val repository: CanchaReservationRepository
 ) : ViewModel() {
 
+    private val CHAT_TOKEN = ""
+
     private val _weatherState = MutableStateFlow<ApiUiState<WeatherResponse>>(ApiUiState.Idle)
     val weatherState: StateFlow<ApiUiState<WeatherResponse>> = _weatherState.asStateFlow()
 
-    private val _geminiState = MutableStateFlow<ApiUiState<GeminiResponse>>(ApiUiState.Idle)
-    val geminiState: StateFlow<ApiUiState<GeminiResponse>> = _geminiState.asStateFlow()
+    private val _chatState = MutableStateFlow<ApiUiState<ChatResponse>>(ApiUiState.Idle)
+    val chatState: StateFlow<ApiUiState<ChatResponse>> = _chatState.asStateFlow()
 
     fun fetchWeather(lat: Double, lon: Double) {
         viewModelScope.launch {
@@ -35,15 +37,54 @@ class ApiViewModel(
         }
     }
 
-    fun askGemini(apiKey: String, prompt: String) {
+    private fun getWeatherDescription(code: Int): String {
+        return when (code) {
+            0 -> "Cielo despejado"
+            1, 2, 3 -> "Parcialmente nublado"
+            45, 48 -> "Neblina"
+            51, 53, 55 -> "Llovizna"
+            61, 63, 65 -> "Lluvia"
+            71, 73, 75 -> "Nieve"
+            77 -> "Granizo"
+            80, 81, 82 -> "Chubascos"
+            95, 96, 99 -> "Tormenta"
+            else -> "Clima variado"
+        }
+    }
+
+    fun askChatBot(prompt: String) {
+        val weatherInfo = when (val s = _weatherState.value) {
+            is ApiUiState.Success -> {
+                val desc = getWeatherDescription(s.data.current_weather.weathercode)
+                "Clima actual en Lima: ${s.data.current_weather.temperature}°C, $desc. "
+            }
+            else -> "Clima no disponible. "
+        }
+
+        val context = """
+            Eres un asistente para la app 'Agenda Citas Deportivas'. 
+            Responde SOLO sobre: disponibilidad, características de canchas, precios, recomendaciones de horarios y clima.
+            
+            Información:
+            - Estadio Nacional: Fútbol, S/50.
+            - Lawn Tennis: Tenis, S/40.
+            - Limatambo: Bádminton (Techado), S/30.
+            - El Golazo: Fútbol 7, S/45.
+            - Horario: 08:00 a 22:00.
+            - Clima: $weatherInfo (Si llueve, recomienda Limatambo por ser techado).
+            
+            Si preguntan algo ajeno, di que no puedes responder.
+            Respuesta corta:
+        """.trimIndent()
+
         viewModelScope.launch {
-            _geminiState.value = ApiUiState.Loading
-            repository.askGemini(apiKey, prompt).fold(
+            _chatState.value = ApiUiState.Loading
+            repository.askChatBot(CHAT_TOKEN, "$context \nUsuario: $prompt").fold(
                 onSuccess = { response ->
-                    _geminiState.value = ApiUiState.Success(response)
+                    _chatState.value = ApiUiState.Success(response)
                 },
                 onFailure = { error ->
-                    _geminiState.value = ApiUiState.Error(error.message ?: "Error desconocido")
+                    _chatState.value = ApiUiState.Error(error.message ?: "Error desconocido")
                 }
             )
         }

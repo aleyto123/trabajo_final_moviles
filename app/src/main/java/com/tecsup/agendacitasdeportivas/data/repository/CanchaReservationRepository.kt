@@ -2,9 +2,9 @@ package com.tecsup.agendacitasdeportivas.data.repository
 
 import com.tecsup.agendacitasdeportivas.data.local.CanchaReservationDao
 import com.tecsup.agendacitasdeportivas.data.local.CanchaReservationEntity
+import com.tecsup.agendacitasdeportivas.data.network.ChatResponse
 import com.tecsup.agendacitasdeportivas.data.network.RetrofitClient
 import com.tecsup.agendacitasdeportivas.data.network.WeatherResponse
-import com.tecsup.agendacitasdeportivas.data.network.GeminiResponse
 import kotlinx.coroutines.flow.Flow
 import java.net.UnknownHostException
 
@@ -43,19 +43,32 @@ class CanchaReservationRepository(
         }
     }
 
-    suspend fun askGemini(apiKey: String, prompt: String): Result<GeminiResponse> {
+    suspend fun askChatBot(token: String, prompt: String): Result<ChatResponse> {
         return try {
-            val requestBody = mapOf(
-                "contents" to listOf(
-                    mapOf("parts" to listOf(mapOf("text" to prompt)))
+            // Separar contexto si existe el marcador
+            val messages = if (prompt.contains("\nUsuario:")) {
+                val parts = prompt.split("\nUsuario:")
+                listOf(
+                    com.tecsup.agendacitasdeportivas.data.network.ChatMessage(role = "system", content = parts[0].trim()),
+                    com.tecsup.agendacitasdeportivas.data.network.ChatMessage(role = "user", content = parts[1].trim())
                 )
+            } else {
+                listOf(
+                    com.tecsup.agendacitasdeportivas.data.network.ChatMessage(role = "user", content = prompt)
+                )
+            }
+
+            val request = com.tecsup.agendacitasdeportivas.data.network.ChatRequest(
+                model = "llama-3.1-8b-instant", // Modelo altamente compatible y rápido en Groq
+                messages = messages,
+                temperature = 0.5
             )
-            val response = RetrofitClient.geminiApi.generateContent(apiKey, requestBody)
+            
+            val authHeader = if (token.trim().startsWith("Bearer ")) token.trim() else "Bearer ${token.trim()}"
+            val response = RetrofitClient.chatApi.getChatCompletion(authHeader, request)
             Result.success(response)
-        } catch (e: UnknownHostException) {
-            Result.failure(Exception("No hay conexión a internet para contactar a la IA."))
         } catch (e: Exception) {
-            Result.failure(Exception("Error de IA: ${e.localizedMessage}"))
+            Result.failure(Exception("Error de ChatBot: ${e.localizedMessage}"))
         }
     }
 }
