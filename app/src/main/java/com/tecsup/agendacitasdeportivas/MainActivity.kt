@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.google.firebase.Firebase
+import com.google.firebase.initialize
 import com.tecsup.agendacitasdeportivas.data.local.AppDatabase
 import com.tecsup.agendacitasdeportivas.data.repository.CanchaReservationRepository
 import com.tecsup.agendacitasdeportivas.ui.navigation.AppNavigation
@@ -44,6 +46,9 @@ class MainActivity : ComponentActivity() {
 
             val reservationViewModel = ViewModelProvider(this, factory)[ReservationViewModel::class.java]
             val apiViewModel = ViewModelProvider(this, factory)[ApiViewModel::class.java]
+
+            // Inicializar Firebase
+            Firebase.initialize(this)
 
             setContent {
                 AgendaCitasDeportivasTheme {

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "810152051773",
+    "project_id": "canchalibre-6d670",
+    "storage_bucket": "canchalibre-6d670.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:810152051773:android:04ac5c2bb77914c8db5654",
+        "android_client_info": {
+          "package_name": "com.tecsup.AgendaCitasDeportivas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyByhBmF_uQQgCR8Cty07yKXrFDPiCFzUBA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

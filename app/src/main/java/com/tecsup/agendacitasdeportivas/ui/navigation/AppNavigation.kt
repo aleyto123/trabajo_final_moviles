@@ -1,18 +1,19 @@
 package com.tecsup.agendacitasdeportivas.ui.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.tecsup.agendacitasdeportivas.ui.screens.*
-import com.tecsup.agendacitasdeportivas.ui.viewmodel.ReservationViewModel
-import com.tecsup.agendacitasdeportivas.ui.viewmodel.ApiViewModel
+import androidx.compose.runtime.Composable //dibuja la interfaz visual
+import androidx.navigation.NavType // indica que tipo de dato se pasan entre pantallas
+import androidx.navigation.compose.NavHost // gestiona el intercambio de pantallas cuando ocurre una acción
+import androidx.navigation.compose.composable //define las rutas
+import androidx.navigation.compose.rememberNavController // maneja el historial para volver atras
+import androidx.navigation.navArgument // crea y configura los argumentos que viajaran atraves de la ruta
+
+import com.tecsup.agendacitasdeportivas.ui.screens.* //trae todas las pantallas
+import com.tecsup.agendacitasdeportivas.ui.viewmodel.ReservationViewModel // importa el cerebro que maneja el CRUD con room
+import com.tecsup.agendacitasdeportivas.ui.viewmodel.ApiViewModel // importa el cerebro de las apis
 
 @Composable
 fun AppNavigation(reservationViewModel: ReservationViewModel, apiViewModel: ApiViewModel) {
-    val navController = rememberNavController()
+    val navController = rememberNavController() // inicia y me lleva a otras pantallas y recuerda el camino
 
     NavHost(navController = navController, startDestination = "cancha_list") {
         composable("cancha_list") {
