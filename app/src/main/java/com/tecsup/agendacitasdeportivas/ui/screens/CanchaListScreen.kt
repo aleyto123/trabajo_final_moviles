@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.SportsSoccer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -35,12 +36,12 @@ import com.tecsup.agendacitasdeportivas.ui.viewmodel.AuthViewModel
 @Composable
 fun CanchaListScreen(navController: NavController, authViewModel: AuthViewModel? = null) {
     var selectedCategory by remember { mutableStateOf("Todas") }
+    var searchQuery by remember { mutableStateOf("") }
     val categories = listOf("Todas", "Futbol", "Tenis", "Badminton", "Basquet", "Voley")
 
-    val filteredCanchas = if (selectedCategory == "Todas") {
-        CanchaProvider.allCanchas
-    } else {
-        CanchaProvider.allCanchas.filter { it.type == selectedCategory }
+    val filteredCanchas = CanchaProvider.allCanchas.filter { cancha ->
+        (selectedCategory == "Todas" || cancha.type == selectedCategory) &&
+        (searchQuery.isEmpty() || cancha.name.contains(searchQuery, ignoreCase = true))
     }
 
     Scaffold(
@@ -73,6 +74,25 @@ fun CanchaListScreen(navController: NavController, authViewModel: AuthViewModel?
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surface)
         ) {
+            // Buscador Premium
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                placeholder = { Text("Buscar cancha por nombre...") },
+                leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                )
+            )
+
             // Filtros de Categoría
             LazyRow(
                 modifier = Modifier.padding(vertical = 8.dp),

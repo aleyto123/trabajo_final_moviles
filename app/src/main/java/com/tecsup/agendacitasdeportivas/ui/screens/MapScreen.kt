@@ -1,5 +1,7 @@
 package com.tecsup.agendacitasdeportivas.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -19,6 +21,8 @@ import org.osmdroid.config.Configuration
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,24 +33,56 @@ fun MapScreen(navController: NavController, initialCanchaId: String? = null) {
         CanchaProvider.allCanchas.find { it.id == initialCanchaId }
     }
 
-    // Configuración obligatoria de OsmDroid para evitar bloqueos de servidores de teselas
-    LaunchedEffect(Unit) {
-        Configuration.getInstance().userAgentValue = context.packageName
-    }
-
-    // Instancia de MapView recordada para manejar su ciclo de vida
-    val mapView = remember {
-        MapView(context).apply {
-            setMultiTouchControls(true)
+    // Overlay para la ubicación del usuario
+    val myLocationOverlay = remember {
+        MyLocationNewOverlay(GpsMyLocationProvider(context), null).apply {
+            enableMyLocation()
+            enableFollowLocation() // Seguir al usuario al inicio
         }
     }
 
-    // Manejo del ciclo de vida nativo de OsmDroid dentro de Compose
+    // Launcher para pedir permisos de ubicación en tiempo de ejecución
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val fineLocationGranted = permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+        val coarseLocationGranted = permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+        if (fineLocationGranted || coarseLocationGranted) {
+            myLocationOverlay.enableMyLocation()
+        }
+    }
+
+    // Configuración obligatoria de OsmDroid y petición de permisos
+    LaunchedEffect(Unit) {
+        Configuration.getInstance().userAgentValue = context.packageName
+        locationPermissionLauncher.launch(
+            arrayOf(
+                android.Manifest.permission.ACCESS_FINE_LOCATION,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        )
+    }
+
+    // Instancia de MapView recordada
+    val mapView = remember {
+        MapView(context).apply {
+            setMultiTouchControls(true)
+            overlays.add(myLocationOverlay)
+        }
+    }
+
+    // Manejo del ciclo de vida nativo de OsmDroid
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_RESUME -> mapView.onResume()
-                Lifecycle.Event.ON_PAUSE -> mapView.onPause()
+                Lifecycle.Event.ON_RESUME -> {
+                    mapView.onResume()
+                    myLocationOverlay.enableMyLocation()
+                }
+                Lifecycle.Event.ON_PAUSE -> {
+                    mapView.onPause()
+                    myLocationOverlay.disableMyLocation()
+                }
                 else -> {}
             }
         }
@@ -59,7 +95,7 @@ fun MapScreen(navController: NavController, initialCanchaId: String? = null) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Geolocalización (OpenStreetMap)", fontWeight = FontWeight.Bold) },
+                title = { Text("Geolocalización", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás")
@@ -78,14 +114,15 @@ fun MapScreen(navController: NavController, initialCanchaId: String? = null) {
                     val startPoint = if (initialCancha != null) {
                         GeoPoint(initialCancha.latitude, initialCancha.longitude)
                     } else {
-                        GeoPoint(-12.0673, -77.0337) // Estadio Nacional de Lima
+                        GeoPoint(-12.0673, -77.0337)
                     }
                     controller.setCenter(startPoint)
                 }
             },
             update = { mv ->
-                // Limpieza y redibujado de marcadores para evitar duplicados
-                mv.overlays.clear()
+                // Limpieza de marcadores de canchas (sin tocar la capa de ubicación)
+                val markersToRemove = mv.overlays.filterIsInstance<Marker>()
+                mv.overlays.removeAll(markersToRemove)
                 
                 CanchaProvider.allCanchas.forEach { cancha ->
                     val marker = Marker(mv)
@@ -96,7 +133,7 @@ fun MapScreen(navController: NavController, initialCanchaId: String? = null) {
                     mv.overlays.add(marker)
                 }
                 
-                mv.invalidate() // Forzar refresco visual
+                mv.invalidate()
             }
         )
     }
