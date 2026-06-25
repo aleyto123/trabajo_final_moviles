@@ -1,5 +1,6 @@
 package com.tecsup.agendacitasdeportivas.ui.screens
 
+import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,51 +34,45 @@ fun MapScreen(navController: NavController, initialCanchaId: String? = null) {
         CanchaProvider.allCanchas.find { it.id == initialCanchaId }
     }
 
-    // Overlay para la ubicación del usuario
-    val myLocationOverlay = remember {
-        MyLocationNewOverlay(GpsMyLocationProvider(context), null).apply {
-            enableMyLocation()
-            enableFollowLocation() // Seguir al usuario al inicio
+    // Instancia de MapView
+    val mapView = remember {
+        MapView(context).apply {
+            setMultiTouchControls(true)
         }
     }
 
-    // Launcher para pedir permisos de ubicación en tiempo de ejecución
+    // Overlay para la ubicación del usuario
+    val myLocationOverlay = remember {
+        MyLocationNewOverlay(GpsMyLocationProvider(context), mapView).apply {
+            disableMyLocation() // Se habilita solo con permisos
+        }
+    }
+
+    // Launcher para pedir permisos
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val fineLocationGranted = permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] ?: false
-        val coarseLocationGranted = permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
-        if (fineLocationGranted || coarseLocationGranted) {
+        if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+            permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true) {
             myLocationOverlay.enableMyLocation()
         }
     }
 
-    // Configuración obligatoria de OsmDroid y petición de permisos
+    // Configuración inicial
     LaunchedEffect(Unit) {
         Configuration.getInstance().userAgentValue = context.packageName
         locationPermissionLauncher.launch(
-            arrayOf(
-                android.Manifest.permission.ACCESS_FINE_LOCATION,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION
-            )
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
         )
     }
 
-    // Instancia de MapView recordada
-    val mapView = remember {
-        MapView(context).apply {
-            setMultiTouchControls(true)
-            overlays.add(myLocationOverlay)
-        }
-    }
-
-    // Manejo del ciclo de vida nativo de OsmDroid
+    // Ciclo de vida
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
                     mapView.onResume()
-                    myLocationOverlay.enableMyLocation()
+                    // Re-habilitar solo si ya tenía permiso (opcional, mejor dejarlo al launcher)
                 }
                 Lifecycle.Event.ON_PAUSE -> {
                     mapView.onPause()
@@ -89,6 +84,7 @@ fun MapScreen(navController: NavController, initialCanchaId: String? = null) {
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
+            mapView.onDetach()
         }
     }
 
@@ -117,10 +113,15 @@ fun MapScreen(navController: NavController, initialCanchaId: String? = null) {
                         GeoPoint(-12.0673, -77.0337)
                     }
                     controller.setCenter(startPoint)
+                    
+                    // Aseguramos que el overlay de ubicación esté presente
+                    if (!overlays.contains(myLocationOverlay)) {
+                        overlays.add(myLocationOverlay)
+                    }
                 }
             },
             update = { mv ->
-                // Limpieza de marcadores de canchas (sin tocar la capa de ubicación)
+                // Actualizar marcadores de canchas
                 val markersToRemove = mv.overlays.filterIsInstance<Marker>()
                 mv.overlays.removeAll(markersToRemove)
                 

@@ -97,7 +97,7 @@ fun ProfileScreen(navController: NavController, authViewModel: AuthViewModel) {
             )
 
             Text(
-                text = "Entusiasta del Deporte • Miembro desde 2024",
+                text = "Entusiasta del Deporte • Miembro desde 2026",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
