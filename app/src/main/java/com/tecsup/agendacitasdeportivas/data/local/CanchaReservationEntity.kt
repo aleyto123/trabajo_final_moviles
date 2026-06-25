@@ -7,12 +7,14 @@ import java.util.UUID
 @Entity(tableName = "table_cancha_reservations")
 data class CanchaReservationEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
-    val userId: String,
-    val canchaType: String,
-    val customerName: String,
-    val reservationDate: String,
-    val reservationTime: String,
-    val hourlyPrice: Double,
-    val paymentStatus: String,
-    val isSynced: Boolean = false
+    val userId: String = "",
+    val canchaType: String = "",
+    val customerName: String = "",
+    val reservationDate: String = "",
+    val reservationTime: String = "",
+    val hourlyPrice: Double = 0.0,
+    val paymentStatus: String = "Pendiente",
+    val estado: String = "Pendiente",
+    val fcmToken: String = "",
+    val synced: Boolean = false // Cambiado de isSynced a synced para coincidir con Firestore
 )

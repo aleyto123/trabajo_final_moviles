@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [CanchaReservationEntity::class], version = 2, exportSchema = false)
+@Database(entities = [CanchaReservationEntity::class], version = 4, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun canchaReservationDao(): CanchaReservationDao
@@ -19,7 +19,7 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "canchas_database_v3"
+                    "canchas_database_v4"
                 )
                 .fallbackToDestructiveMigration()
                 .build()

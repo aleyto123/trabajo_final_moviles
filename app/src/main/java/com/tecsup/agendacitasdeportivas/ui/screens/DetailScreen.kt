@@ -59,10 +59,6 @@ fun ReservationDetailContent(navController: NavController, viewModel: Reservatio
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
             context.startActivity(intent)
             
-            // Simulamos éxito para el historial
-            (detailState as? DetailUiState.Success)?.reservation?.let {
-                viewModel.onPaymentSuccess(it)
-            }
             viewModel.clearPaymentLink()
         }
     }
@@ -96,7 +92,11 @@ fun ReservationDetailContent(navController: NavController, viewModel: Reservatio
                         Image(
                             painter = painterResource(id = cancha.imageRes),
                             contentDescription = null,
-                            modifier = Modifier.fillMaxWidth().height(200.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(220.dp)
+                                .padding(16.dp)
+                                .clip(RoundedCornerShape(24.dp)),
                             contentScale = ContentScale.Crop
                         )
                     }
@@ -110,52 +110,56 @@ fun ReservationDetailContent(navController: NavController, viewModel: Reservatio
                                 Text(
                                     text = res.canchaType,
                                     style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.Black
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = (-1).sp
                                 )
                                 Text(
-                                    text = "A nombre de: ${res.customerName}",
+                                    text = "Reserva de ${res.customerName}",
                                     style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
                             
                             Surface(
-                                color = if (res.paymentStatus == "Pagado") Color(0xFFE8F5E9) else Color(0xFFFFF3E0),
-                                shape = RoundedCornerShape(12.dp),
-                                border = BorderStroke(1.dp, if (res.paymentStatus == "Pagado") Color(0xFF4CAF50) else Color(0xFFFF9800))
+                                color = if (res.estado.lowercase() == "pagado") Color(0xFFE8F5E9) else Color(0xFFFFF3E0),
+                                shape = RoundedCornerShape(16.dp),
+                                border = BorderStroke(1.dp, if (res.estado.lowercase() == "pagado") Color(0xFF4CAF50) else Color(0xFFFF9800))
                             ) {
                                 Text(
-                                    text = res.paymentStatus.uppercase(),
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (res.paymentStatus == "Pagado") Color(0xFF2E7D32) else Color(0xFFEF6C00)
+                                    text = res.estado.uppercase(),
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = if (res.estado.lowercase() == "pagado") Color(0xFF2E7D32) else Color(0xFFEF6C00)
                                 )
                             }
                         }
 
-                        HorizontalDivider(Modifier.padding(vertical = 24.dp))
+                        HorizontalDivider(Modifier.padding(vertical = 24.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
 
-                        DetailRow(icon = Icons.Rounded.Event, label = "Fecha", value = res.reservationDate)
-                        DetailRow(icon = Icons.Rounded.Schedule, label = "Horario", value = res.reservationTime)
-                        DetailRow(icon = Icons.Rounded.Payments, label = "Monto Total", value = "S/. ${String.format("%.2f", res.hourlyPrice)}")
+                        DetailRow(icon = Icons.Rounded.Event, label = "Fecha del Encuentro", value = res.reservationDate)
+                        DetailRow(icon = Icons.Rounded.Schedule, label = "Horario Reservado", value = res.reservationTime)
+                        DetailRow(icon = Icons.Rounded.Payments, label = "Inversión Total", value = "S/. ${String.format("%.2f", res.hourlyPrice)}")
 
-                        if (res.paymentStatus == "Pendiente") {
-                            Spacer(Modifier.height(32.dp))
-                            
+                        Spacer(Modifier.height(32.dp))
+
+                        if (res.estado.lowercase() != "pagado") {
                             // AVISO DE CANCELACIÓN (REQUERIDO)
                             Surface(
-                                color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
+                                color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f),
                                 shape = RoundedCornerShape(16.dp),
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.3f))
                             ) {
                                 Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Rounded.Warning, null, tint = MaterialTheme.colorScheme.error)
                                     Spacer(Modifier.width(12.dp))
                                     Text(
-                                        "AVISO: Si no realizas el pago en las próximas 2 horas, tu reserva será cancelada automáticamente.",
+                                        "Importante: Realiza el pago pronto para asegurar tu reserva.",
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onErrorContainer
+                                        color = MaterialTheme.colorScheme.error,
+                                        fontWeight = FontWeight.Medium
                                     )
                                 }
                             }
@@ -175,25 +179,43 @@ fun ReservationDetailContent(navController: NavController, viewModel: Reservatio
                                 isLoading = isProcessingPayment,
                                 amount = res.hourlyPrice,
                                 onClick = { 
-                                    viewModel.startPaymentNotificationListener(res.id)
                                     viewModel.generatePaymentLink(res) 
                                 }
                             )
+
+                            Spacer(modifier = Modifier.height(12.dp))
                         }
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                        // BOTÓN MODIFICAR (NUEVO)
+                        Button(
+                            onClick = { navController.navigate("edit_screen/${res.id}") },
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        ) {
+                            Icon(Icons.Rounded.Edit, null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("MODIFICAR RESERVA", fontWeight = FontWeight.Bold)
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         OutlinedButton(
                             onClick = { viewModel.delete(res); navController.popBackStack() },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
                         ) {
                             Icon(Icons.Rounded.Delete, null)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("CANCELAR RESERVA")
+                            Text("CANCELAR RESERVA", fontWeight = FontWeight.Bold)
                         }
                     }
+
                 }
             }
         }
@@ -238,46 +260,80 @@ fun CanchaDetailContent(navController: NavController, id: String) {
             Image(
                 painter = painterResource(id = cancha.imageRes),
                 contentDescription = null,
-                modifier = Modifier.fillMaxWidth().height(300.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(320.dp)
+                    .padding(16.dp)
+                    .clip(RoundedCornerShape(32.dp)),
                 contentScale = ContentScale.Crop
             )
             Column(modifier = Modifier.padding(24.dp)) {
-                Text(text = cancha.name, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Black)
-                Text(text = cancha.type, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        DetailRow(icon = Icons.Rounded.LocationOn, label = "Dirección", value = cancha.address)
-                    }
-                    IconButton(
-                        onClick = { navController.navigate("map_screen/${cancha.id}") },
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer)
-                    ) {
-                        Icon(
-                            Icons.Rounded.Map,
-                            contentDescription = "Ver en mapa",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                }
-
-                DetailRow(icon = Icons.Rounded.Payments, label = "Precio por hora", value = "S/. ${cancha.pricePerHour}")
+                Text(
+                    text = cancha.name,
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = (-1).sp
+                )
+                Text(
+                    text = cancha.type.uppercase(),
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.ExtraBold,
+                    style = MaterialTheme.typography.labelLarge
+                )
                 
                 Spacer(modifier = Modifier.height(24.dp))
                 
-                Text(text = "Sobre esta cancha", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                // Card para agrupar info básica
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Box(modifier = Modifier.weight(1f)) {
+                                DetailRow(icon = Icons.Rounded.LocationOn, label = "Ubicación", value = cancha.address)
+                            }
+                            IconButton(
+                                onClick = { navController.navigate("map_screen/${cancha.id}") },
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary)
+                            ) {
+                                Icon(
+                                    Icons.Rounded.Map,
+                                    contentDescription = "Ver en mapa",
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
+
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+
+                        DetailRow(icon = Icons.Rounded.Payments, label = "Precio por hora", value = "S/. ${String.format("%.2f", cancha.pricePerHour)}")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+                
                 Text(
-                    text = "Cancha profesional con iluminación LED, vestuarios y estacionamiento gratuito. Ideal para torneos y pichangas con amigos.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "Descripción de la Sede",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Disfruta de una experiencia deportiva de primer nivel. Nuestras canchas cuentan con gras sintético certificado, iluminación LED de alta potencia para tus partidos nocturnos, vestuarios modernos y seguridad permanente.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 24.sp
+                )
+                
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }

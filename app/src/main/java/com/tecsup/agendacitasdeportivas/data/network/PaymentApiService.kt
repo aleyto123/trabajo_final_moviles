@@ -15,7 +15,8 @@ interface PaymentApiService {
 data class MPPreferenceRequest(
     val items: List<MPItem>,
     val back_urls: MPBackUrls,
-    val auto_return: String = "approved"
+    val auto_return: String = "approved",
+    val external_reference: String
 )
 
 data class MPItem(

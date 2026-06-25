@@ -19,7 +19,7 @@ interface FcmApiService {
     ): retrofit2.Response<Unit>
 }
 
-// Modelos para FCM V1
+// Estructura oficial V1 (No modificar)
 data class FcmV1Payload(
     val message: FcmV1Message
 )
@@ -29,14 +29,12 @@ data class FcmV1Message(
     val notification: FcmNotification
 )
 
-data class FcmPayload(
-    val to: String, // "/topics/reservas"
-    val notification: FcmNotification,
-    val data: Map<String, String> = emptyMap()
-)
-
 data class FcmNotification(
     val title: String,
-    val body: String,
-    val sound: String = "default"
+    val body: String
+)
+
+data class FcmPayload(
+    val to: String,
+    val notification: FcmNotification
 )

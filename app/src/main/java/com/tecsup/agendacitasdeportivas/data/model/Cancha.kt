@@ -122,21 +122,21 @@ object CanchaProvider {
             "15", "Coliseo Dibós - Anexo", "Basquet",
             "Av. Angamos Este 2681, San Borja", 60.0,
             "Piso de madera flotante, aros profesionales.",
-            R.drawable.futbol_2,
+            R.drawable.im1,
             -12.1105, -77.0021
         ),
         Cancha(
             "16", "Hoop Surquillo", "Basquet",
             "Av. Tomás Marsano 500, Surquillo", 40.0,
             "Cancha de cemento pulido bajo techo.",
-            R.drawable.futbol_2,
+            R.drawable.im2,
             -12.1122, -77.0205
         ),
         Cancha(
             "17", "Parque Zonal Huiracocha", "Basquet",
             "Av. Próceres de la Independencia, SJL", 20.0,
             "Cancha municipal al aire libre, aros de metal resistente.",
-            R.drawable.futbol_2,
+            R.drawable.im3,
             -11.9961, -77.0012
         ),
         Cancha(
@@ -194,14 +194,14 @@ object CanchaProvider {
             "25", "Voley Plaza Sur", "Voley",
             "Av. Pedro de Osma 400, Barranco", 45.0,
             "Cancha techada con piso oficial y malla regulable.",
-            R.drawable.futbol_2,
+            R.drawable.im4,
             -12.1492, -77.0215
         ),
         Cancha(
             "26", "Red Central Lince", "Voley",
             "Av. Arenales 1800, Lince", 40.0,
             "Ambiente cerrado, postes acolchados y buena luz.",
-            R.drawable.futbol_2,
+            R.drawable.im5,
             -12.0815, -77.0355
         ),
         Cancha(
@@ -266,14 +266,14 @@ object CanchaProvider {
             "35", "Rinconada Tenis", "Tenis",
             "Calle La Rinconada 200, La Molina", 90.0,
             "Cancha de arcilla de primer nivel, mantenimiento diario.",
-            R.drawable.futbol_2,
+            R.drawable.im6,
             -12.0792, -76.9189
         ),
         Cancha(
             "36", "Terrazas Club - T2", "Tenis",
             "Malecón 28 de Julio 390, Miraflores", 100.0,
             "Vista al mar, superficie dura (cemento), iluminación LED.",
-            R.drawable.futbol_2,
+            R.drawable.im9,
             -12.1292, -77.0315
         ),
         Cancha(
@@ -287,14 +287,14 @@ object CanchaProvider {
             "38", "Raqueta Dorada", "Tenis",
             "Av. Coronel Portillo 500, San Isidro", 120.0,
             "Exclusiva cancha techada, máxima privacidad.",
-            R.drawable.futbol_2,
+            R.drawable.im5,
             -12.0995, -77.0425
         ),
         Cancha(
             "39", "Match Point Barranco", "Tenis",
             "Av. El Sol Este 200, Barranco", 65.0,
             "Cancha rápida de asfalto pintado, ambiente bohemio.",
-            R.drawable.futbol_2,
+            R.drawable.im4,
             -12.1425, -77.0185
         ),
         Cancha(
@@ -338,42 +338,42 @@ object CanchaProvider {
             "45", "Legado Panamericanos VES", "Badminton",
             "Av. Mariano Pastor Sevilla s/n, Villa El Salvador", 35.0,
             "Sede oficial con tapiz sintético profesional y techo alto.",
-            R.drawable.futbol_2,
+            R.drawable.im3,
             -12.2355, -76.9485
         ),
         Cancha(
             "46", "Club AELU - Pabellón B", "Badminton",
             "Jr. Paracas 565, Pueblo Libre", 60.0,
             "Excelente iluminación, piso de madera flotante antideslizante.",
-            R.drawable.futbol_2,
+            R.drawable.im1,
             -12.0745, -77.0685
         ),
         Cancha(
             "47", "Villa Deportiva del Callao", "Badminton",
             "Av. Guardia Chalaca 2199, Bellavista", 30.0,
             "Espacio amplio, ideal para entrenamientos de nivel intermedio.",
-            R.drawable.futbol_2,
+            R.drawable.im5,
             -12.0585, -77.1245
         ),
         Cancha(
             "48", "Plaza Bádminton Surco", "Badminton",
             "Av. La Encalada 800, Surco", 55.0,
             "Cancha techada, ambiente sin corrientes de aire para juego preciso.",
-            R.drawable.futbol_2,
+            R.drawable.im9,
             -12.1095, -76.9815
         ),
         Cancha(
             "49", "Polideportivo Costa Verde", "Badminton",
             "Circuito de Playas s/n, San Miguel", 40.0,
             "Instalaciones modernas frente al mar, mallas en perfecto estado.",
-            R.drawable.futbol_2,
+            R.drawable.im2,
             -12.0915, -77.0985
         ),
         Cancha(
             "50", "Palacio de la Juventud", "Badminton",
             "Av. Universitaria 2086, Los Olivos", 25.0,
             "Cancha municipal de cemento pulido, muy accesible.",
-            R.drawable.futbol_2,
+            R.drawable.im2,
             -11.9745, -77.0815
         ),
         Cancha(

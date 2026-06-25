@@ -15,13 +15,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.tecsup.agendacitasdeportivas.data.model.CanchaProvider
 import com.tecsup.agendacitasdeportivas.ui.viewmodel.ReservationViewModel
 import com.tecsup.agendacitasdeportivas.ui.state.ReservationUiState
 
@@ -95,12 +99,13 @@ fun StatisticsScreen(navController: NavController, viewModel: ReservationViewMod
                         items(keysList) { type ->
                             val count = grouped[type]?.size ?: 0
                             val income = grouped[type]?.sumOf { it.hourlyPrice } ?: 0.0
+                            val cancha = CanchaProvider.allCanchas.find { it.name == type }
                             
                             StatListItem(
                                 title = type,
                                 subtitle = "$count reservas realizadas",
                                 value = "S/. $income",
-                                icon = Icons.Rounded.Analytics
+                                iconRes = cancha?.imageRes
                             )
                         }
                     }
@@ -181,7 +186,7 @@ fun StatMiniBlock(modifier: Modifier, label: String, value: String, icon: ImageV
 }
 
 @Composable
-fun StatListItem(title: String, subtitle: String, value: String, icon: ImageVector) {
+fun StatListItem(title: String, subtitle: String, value: String, iconRes: Int? = null) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -197,7 +202,16 @@ fun StatListItem(title: String, subtitle: String, value: String, icon: ImageVect
                 modifier = Modifier.size(48.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSecondaryContainer)
+                    if (iconRes != null) {
+                        androidx.compose.foundation.Image(
+                            painter = painterResource(id = iconRes),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(Icons.Rounded.Analytics, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSecondaryContainer)
+                    }
                 }
             }
             
