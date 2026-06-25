@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.kapt) // <--- Esta es la clave mágica que conecta con tu TOML
+    alias(libs.plugins.kotlin.kapt)
     id("com.google.gms.google-services")
 }
 
@@ -36,6 +36,12 @@ android {
     buildFeatures {
         compose = true
     }
+    packaging {
+        resources {
+            excludes += "/META-INF/INDEX.LIST"
+            excludes += "META-INF/DEPENDENCIES"
+        }
+    }
 }
 
 dependencies {
@@ -48,6 +54,39 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.7.5")
+
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.messaging)
+
+    // Identity & Credentials
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+
+    // Navigation & Architecture
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.3")
+
+    // Room
+    implementation("androidx.room:room-runtime:2.7.0-rc01")
+    implementation("androidx.room:room-ktx:2.7.0-rc01")
+    "kapt"("androidx.room:room-compiler:2.7.0-rc01")
+
+    // Network
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // Google Auth para FCM V1
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.23.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
+
+    // Maps (OpenStreetMap - OSMDroid)
+    implementation(libs.osmdroid)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -56,27 +95,4 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-
-    // --- TUS LIBRERÍAS DEL EXPEDIENTE ---
-
-    // Navegación
-    implementation("androidx.navigation:navigation-compose:2.7.7")
-
-    // ViewModel Compose
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.3")
-
-    // Room (Persistencia Local) - Actualizado a 2.7.0-rc01 para compatibilidad con Kotlin 2.1
-    implementation("androidx.room:room-runtime:2.7.0-rc01")
-    implementation("androidx.room:room-ktx:2.7.0-rc01")
-    "kapt"("androidx.room:room-compiler:2.7.0-rc01")
-
-    // Retrofit y OkHttp (APIs)
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-
-    // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:34.15.0"))
-    implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-messaging")
 }

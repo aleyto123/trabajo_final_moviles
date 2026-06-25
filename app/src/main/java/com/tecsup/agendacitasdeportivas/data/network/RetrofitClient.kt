@@ -24,4 +24,22 @@ object RetrofitClient {
             .build()
             .create(GroqApiService::class.java)
     }
+
+    val paymentApi: PaymentApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl("https://api.mercadopago.com/")
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(PaymentApiService::class.java)
+    }
+
+    val fcmApi: FcmApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl("https://fcm.googleapis.com/")
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(FcmApiService::class.java)
+    }
 }

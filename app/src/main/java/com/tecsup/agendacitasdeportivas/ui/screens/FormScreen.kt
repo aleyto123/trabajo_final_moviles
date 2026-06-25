@@ -1,6 +1,8 @@
 package com.tecsup.agendacitasdeportivas.ui.screens
 
 import android.app.DatePickerDialog
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -30,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.tecsup.agendacitasdeportivas.data.local.CanchaReservationEntity
 import com.tecsup.agendacitasdeportivas.data.model.CanchaProvider
 import com.tecsup.agendacitasdeportivas.ui.state.ReservationUiState
 import com.tecsup.agendacitasdeportivas.ui.viewmodel.ReservationViewModel
@@ -48,6 +51,17 @@ fun FormScreen(
     val context = LocalContext.current
     val reservationsState by viewModel.uiState.collectAsState()
     val existingReservations = (reservationsState as? ReservationUiState.Success)?.reservations ?: emptyList()
+
+    // Observar éxito de guardado para navegar al detalle
+    LaunchedEffect(viewModel.lastSavedId) {
+        viewModel.lastSavedId?.let { id ->
+            navController.navigate("detail_screen/$id") {
+                // Limpiar el historial del formulario para que no regrese al volver atrás
+                popUpTo("cancha_list") { inclusive = false }
+            }
+            viewModel.lastSavedId = null
+        }
+    }
 
     LaunchedEffect(editId, canchaId) {
         if (editId != null) {
@@ -88,7 +102,7 @@ fun FormScreen(
                 title = { 
                     Text(
                         if (editId == null) "Confirmar Reserva" else "Editar Reserva",
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black)
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     ) 
                 },
                 navigationIcon = {
@@ -242,7 +256,7 @@ fun FormScreen(
                             }
                             
                             Text(
-                                "TOTAL A PAGAR",
+                                "Monto a Pagar", // Cambiado de TOTAL A PAGAR para diferenciar
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 letterSpacing = 1.sp
@@ -255,7 +269,6 @@ fun FormScreen(
                             onClick = {
                                 if (viewModel.isFormValid) {
                                     viewModel.save()
-                                    navController.popBackStack()
                                 } else {
                                     errorMessage = "Complete todos los campos y elija al menos una hora."
                                 }
@@ -265,8 +278,8 @@ fun FormScreen(
                                 .height(64.dp),
                             shape = RoundedCornerShape(20.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
                             ),
                             elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
                         ) {
@@ -275,7 +288,7 @@ fun FormScreen(
                             Text(
                                 if (editId == null) "CONFIRMAR RESERVA" else "GUARDAR CAMBIOS",
                                 style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.ExtraBold,
+                                    fontWeight = FontWeight.Bold,
                                     letterSpacing = 0.5.sp
                                 )
                             )
@@ -287,7 +300,6 @@ fun FormScreen(
                     onClick = {
                         if (viewModel.isFormValid) {
                             viewModel.save()
-                            navController.popBackStack()
                         } else {
                             errorMessage = "Complete todos los campos y elija al menos una hora."
                         }

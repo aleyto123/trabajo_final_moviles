@@ -12,7 +12,20 @@
           "package_name": "com.tecsup.AgendaCitasDeportivas"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "810152051773-jsnc6ihpc884ta6v5107p25o4aqc3vt2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tecsup.AgendaCitasDeportivas",
+            "certificate_hash": "89beb96e5a4d1e4b4215de91a4ee96de77ea4c41"
+          }
+        },
+        {
+          "client_id": "810152051773-7i43i04dsu40sthjngb1vo028fgch4bg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyByhBmF_uQQgCR8Cty07yKXrFDPiCFzUBA"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "810152051773-7i43i04dsu40sthjngb1vo028fgch4bg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

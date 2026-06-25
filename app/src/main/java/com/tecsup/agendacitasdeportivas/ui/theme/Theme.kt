@@ -9,18 +9,21 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = SportsGreenDarkPrimary,
+    secondary = SportsGreenDarkSecondary,
+    tertiary = SportsGreenDarkTertiary,
+    onPrimary = Color.Black
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = SportsGreenPrimary,
+    secondary = SportsGreenSecondary,
+    tertiary = SportsGreenTertiary,
+    onPrimary = Color.Black
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -35,8 +38,8 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun AgendaCitasDeportivasTheme(
-    darkTheme: Boolean = true,
-    // Dynamic color is available on Android 12+
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    // Deshabilitamos dynamic color por defecto para que se vea el verde deportivo
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {

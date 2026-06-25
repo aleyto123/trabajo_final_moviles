@@ -1,3 +1,4 @@
+# Android Studio / IntelliJ
 *.iml
 .gradle
 /local.properties
@@ -13,3 +14,20 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Firebase / Secrets (IMPORTANTE para seguridad)
+google-services.json
+firebase-auth.json
+*.jks
+*.keystore
+
+# Gradle
+.gradle/
+build/
+
+# Kotlin
+.kotlin/
+
+# Web / Hosting
+node_modules/
+.firebase/
