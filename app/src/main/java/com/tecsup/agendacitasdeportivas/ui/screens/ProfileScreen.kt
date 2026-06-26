@@ -152,8 +152,16 @@ fun ProfileScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // AVATAR HEXAGONAL DE ALTA TECNOLOGÍA
+                // AVATAR HÍBRIDO (HEXÁGONO TÉCNICO DENTRO DE ANILLO CIRCULAR)
                 Box(contentAlignment = Alignment.Center) {
+                    // EL CÍRCULO: Anillo exterior que bordea todo con verde semitransparente
+                    Surface(
+                        modifier = Modifier.size(175.dp),
+                        shape = CircleShape,
+                        color = Color.Transparent,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
+                    ) {}
+
                     // Brillo exterior hexagonal
                     Surface(
                         modifier = Modifier.size(160.dp),
@@ -170,7 +178,7 @@ fun ProfileScreen(
                         shadowElevation = 24.dp
                     ) {
                         Box(contentAlignment = Alignment.Center) {
-                            // LA PERSONITA: Rediseñada con look de ÍCONO DE JUGADOR
+                            // LA PERSONITA
                             Icon(
                                 imageVector = Icons.Rounded.Person4, 
                                 contentDescription = null,
@@ -179,6 +187,14 @@ fun ProfileScreen(
                             )
                         }
                     }
+                    
+                    // Segundo círculo decorativo (delgado y cercano al hexágono)
+                    Surface(
+                        modifier = Modifier.size(150.dp),
+                        shape = CircleShape,
+                        color = Color.Transparent,
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
+                    ) {}
                     
                     // Badge de Edición (Cuchilla lateral)
                     Surface(
