@@ -51,16 +51,14 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF0D0B1A))) {
+        // Fondo con gradiente inmersivo
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                            MaterialTheme.colorScheme.surface
-                        )
+                        colors = listOf(Color(0xFF2C254A), Color(0xFF0D0B1A))
                     )
                 )
         )
@@ -68,18 +66,20 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 28.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Spacer(modifier = Modifier.height(48.dp))
 
+            // Logo Premium con diseño de la app
             Surface(
                 modifier = Modifier.size(120.dp),
-                shape = RoundedCornerShape(28.dp),
-                shadowElevation = 8.dp,
-                color = MaterialTheme.colorScheme.surface
+                shape = RoundedCornerShape(32.dp),
+                shadowElevation = 12.dp,
+                color = Color(0xFF1A1633),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.logocanchalibre2),
@@ -94,26 +94,27 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
             Text(
                 text = "CanchaLibre",
                 style = MaterialTheme.typography.displayMedium.copy(
-                    fontWeight = FontWeight.Black,
+                    fontWeight = FontWeight.ExtraBold,
                     letterSpacing = (-1.5).sp
                 ),
-                color = MaterialTheme.colorScheme.primary
+                color = Color.White
             )
 
             Text(
                 text = "Tu próximo partido empieza aquí",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
+                color = Color.White.copy(alpha = 0.6f),
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(48.dp))
 
-            Card(
+            // Formulario Estilo Elite (Glassmorphism)
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(32.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                shape = RoundedCornerShape(28.dp),
+                color = Color.White.copy(alpha = 0.03f),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
@@ -131,11 +132,15 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                            unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedLabelColor = Color.White.copy(alpha = 0.4f)
                         )
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(18.dp))
 
                     OutlinedTextField(
                         value = password,
@@ -146,7 +151,8 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(
                                     imageVector = if (passwordVisible) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
-                                    contentDescription = null
+                                    contentDescription = null,
+                                    tint = Color.White.copy(alpha = 0.4f)
                                 )
                             }
                         },
@@ -157,23 +163,30 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                            unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedLabelColor = Color.White.copy(alpha = 0.4f)
                         )
                     )
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(28.dp))
 
                     Button(
                         onClick = { authViewModel.signInWithEmail(email, password) },
                         modifier = Modifier.fillMaxWidth().height(56.dp),
                         shape = RoundedCornerShape(16.dp),
                         enabled = authState !is AuthState.Loading,
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = Color.Black
+                        )
                     ) {
                         if (authState is AuthState.Loading) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.Black, strokeWidth = 2.dp)
                         } else {
-                            Text("Iniciar Sesión", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+                            Text("Iniciar Sesión", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
                         }
                     }
                 }
@@ -181,11 +194,13 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Google Login con estilo coherente
             OutlinedButton(
                 onClick = { authViewModel.signInWithGoogle(context) },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
@@ -197,8 +212,7 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         "Continuar con Google",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onSurface
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 }
             }
@@ -218,12 +232,12 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("¿No tienes una cuenta?", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("¿No tienes una cuenta?", color = Color.White.copy(alpha = 0.6f))
                 TextButton(onClick = { 
                     authViewModel.resetState()
                     navController.navigate("register") 
                 }) {
-                    Text("Regístrate", fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                    Text("Regístrate", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                 }
             }
             

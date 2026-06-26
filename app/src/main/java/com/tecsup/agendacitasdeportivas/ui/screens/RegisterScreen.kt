@@ -1,6 +1,7 @@
 package com.tecsup.agendacitasdeportivas.ui.screens
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -45,16 +46,14 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF0D0B1A))) {
+        // Fondo coherente con Login y Perfil
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f),
-                            MaterialTheme.colorScheme.surface
-                        )
+                        colors = listOf(Color(0xFF2C254A), Color(0xFF0D0B1A))
                     )
                 )
         )
@@ -62,39 +61,38 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 28.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(60.dp))
 
             Text(
                 text = "Crear Cuenta",
                 style = MaterialTheme.typography.displaySmall.copy(
-                    fontWeight = FontWeight.Black,
+                    fontWeight = FontWeight.ExtraBold,
                     letterSpacing = (-1.5).sp
                 ),
-                color = MaterialTheme.colorScheme.primary
+                color = Color.White
             )
             
             Text(
                 text = "Únete a la mejor comunidad deportiva",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
+                color = Color.White.copy(alpha = 0.6f),
                 modifier = Modifier.padding(top = 8.dp),
                 textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(40.dp))
 
-
-            // Registro con Card (Diseño original)
-            Card(
+            // Formulario Estilo Elite
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(32.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                shape = RoundedCornerShape(28.dp),
+                color = Color.White.copy(alpha = 0.03f),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
@@ -111,7 +109,11 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                            unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedLabelColor = Color.White.copy(alpha = 0.4f)
                         )
                     )
 
@@ -126,7 +128,8 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(
                                     imageVector = if (passwordVisible) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
-                                    contentDescription = null
+                                    contentDescription = null,
+                                    tint = Color.White.copy(alpha = 0.4f)
                                 )
                             }
                         },
@@ -137,7 +140,11 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                            unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedLabelColor = Color.White.copy(alpha = 0.4f)
                         )
                     )
 
@@ -155,7 +162,11 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                            unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedLabelColor = Color.White.copy(alpha = 0.4f)
                         )
                     )
 
@@ -176,12 +187,15 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
                         modifier = Modifier.fillMaxWidth().height(56.dp),
                         shape = RoundedCornerShape(16.dp),
                         enabled = authState !is AuthState.Loading,
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = Color.Black
+                        )
                     ) {
                         if (authState is AuthState.Loading) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.Black, strokeWidth = 2.dp)
                         } else {
-                            Text("Registrarse", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+                            Text("Registrarse", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
                         }
                     }
                 }
@@ -189,16 +203,32 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Mensajes de Error (Estilo original como pidió el usuario)
-            AnimatedVisibility(visible = authState is AuthState.Error) {
+            // Error display mejorado
+            AnimatedVisibility(
+                visible = authState is AuthState.Error,
+                enter = fadeIn() + slideInVertically(),
+                exit = fadeOut() + slideOutVertically()
+            ) {
                 if (authState is AuthState.Error) {
-                    Text(
-                        text = (authState as AuthState.Error).message,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+                    Surface(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                        color = Color(0xFFC62828).copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, Color(0xFFC62828).copy(alpha = 0.3f))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Rounded.ErrorOutline, null, tint = Color(0xFFEF5350))
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = (authState as AuthState.Error).message,
+                                color = Color(0xFFEF5350),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                            )
+                        }
+                    }
                 }
             }
 
@@ -206,11 +236,14 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
                 authViewModel.resetState()
                 navController.navigate("login") 
             }) {
-                Text("¿Ya tienes cuenta? Inicia sesión", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("¿Ya tienes cuenta?", color = Color.White.copy(alpha = 0.6f))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Inicia sesión", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                }
             }
             
             Spacer(modifier = Modifier.height(48.dp))
         }
-
     }
 }

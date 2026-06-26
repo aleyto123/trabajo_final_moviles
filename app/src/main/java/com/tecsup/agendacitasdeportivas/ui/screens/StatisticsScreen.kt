@@ -1,15 +1,19 @@
 package com.tecsup.agendacitasdeportivas.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
 import androidx.compose.material.icons.rounded.AccountBalanceWallet
 import androidx.compose.material.icons.rounded.Analytics
+import androidx.compose.material.icons.rounded.EmojiEvents
+import androidx.compose.material.icons.rounded.FlashOn
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -35,50 +39,37 @@ fun StatisticsScreen(navController: NavController, viewModel: ReservationViewMod
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        containerColor = Color(0xFF0D0B1A),
         topBar = {
             CenterAlignedTopAppBar(
-                title = { 
-                    Text(
-                        "Análisis de Reservas", 
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black)
-                    ) 
-                },
+                title = { Text("Análisis de Campo", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Atrás", tint = Color.White)
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent, titleContentColor = Color.White)
             )
         }
     ) { padding ->
-        Box(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
-                    )
-                )
-        ) {
+        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             when (val state = uiState) {
-                is ReservationUiState.Loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                is ReservationUiState.Error -> Text("Error: ${state.message}", Modifier.align(Alignment.Center), color = MaterialTheme.colorScheme.error)
+                is ReservationUiState.Loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = MaterialTheme.colorScheme.primary)
+                is ReservationUiState.Error -> Text("Error: ${state.message}", Modifier.align(Alignment.Center), color = Color.White)
                 is ReservationUiState.Success -> {
                     val reservations = state.reservations
                     val totalReservations = reservations.size
                     val totalIncome = reservations.sumOf { it.hourlyPrice }
                     val mostReservedCancha = reservations.groupBy { it.canchaType }
-                        .maxByOrNull { it.value.size }?.key ?: "Ninguna"
+                        .maxByOrNull { it.value.size }?.key ?: "Sin datos"
 
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(20.dp)
+                        contentPadding = PaddingValues(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(24.dp)
                     ) {
                         item {
-                            StatSummaryCard(
+                            StatSummaryCardElite(
                                 totalReservations = totalReservations,
                                 totalIncome = totalIncome,
                                 popular = mostReservedCancha
@@ -87,24 +78,23 @@ fun StatisticsScreen(navController: NavController, viewModel: ReservationViewMod
 
                         item {
                             Text(
-                                "Distribución por Deporte", 
-                                style = MaterialTheme.typography.titleMedium, 
-                                fontWeight = FontWeight.ExtraBold,
-                                modifier = Modifier.padding(vertical = 8.dp)
+                                "Rendimiento por Sede", 
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), 
+                                color = Color.White,
+                                modifier = Modifier.padding(start = 4.dp)
                             )
                         }
 
                         val grouped = reservations.groupBy { it.canchaType }
-                        val keysList = grouped.keys.toList()
-                        items(keysList) { type ->
+                        items(grouped.keys.toList()) { type ->
                             val count = grouped[type]?.size ?: 0
                             val income = grouped[type]?.sumOf { it.hourlyPrice } ?: 0.0
                             val cancha = CanchaProvider.allCanchas.find { it.name == type }
                             
-                            StatListItem(
+                            StatListItemElite(
                                 title = type,
-                                subtitle = "$count reservas realizadas",
-                                value = "S/. $income",
+                                subtitle = "$count juegos registrados",
+                                value = "S/. ${income.toInt()}",
                                 iconRes = cancha?.imageRes
                             )
                         }
@@ -116,56 +106,40 @@ fun StatisticsScreen(navController: NavController, viewModel: ReservationViewMod
 }
 
 @Composable
-fun StatSummaryCard(totalReservations: Int, totalIncome: Double, popular: String) {
-    ElevatedCard(
+fun StatSummaryCardElite(totalReservations: Int, totalIncome: Double, popular: String) {
+    Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        color = Color.White.copy(alpha = 0.03f),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.AutoMirrored.Rounded.TrendingUp, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    "Resumen de Rendimiento", 
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                )
+                Icon(Icons.AutoMirrored.Rounded.TrendingUp, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(10.dp))
+                Text("RESUMEN GENERAL", style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp), color = Color.White.copy(alpha = 0.4f))
             }
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(28.dp))
             
-            Row(modifier = Modifier.fillMaxWidth()) {
-                StatMiniBlock(
-                    modifier = Modifier.weight(1f),
-                    label = "Reservas",
-                    value = totalReservations.toString(),
-                    icon = Icons.Rounded.Star
-                )
-                StatMiniBlock(
-                    modifier = Modifier.weight(1f),
-                    label = "Ingresos",
-                    value = "S/. ${totalIncome.toInt()}",
-                    icon = Icons.Rounded.AccountBalanceWallet
-                )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                StatBlockElite("RESERVAS", totalReservations.toString(), Icons.Rounded.FlashOn)
+                StatBlockElite("INGRESOS", "S/. ${totalIncome.toInt()}", Icons.Rounded.AccountBalanceWallet)
             }
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(28.dp))
             
             Surface(
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Rounded.Star, contentDescription = null, tint = Color(0xFFFFB300), modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(12.dp))
+                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Rounded.Star, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
                     Column {
-                        Text("Cancha más popular", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                        Text(popular, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        Text("SEDE PREFERIDA", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.4f))
+                        Text(popular, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold), color = Color.White)
                     }
                 }
             }
@@ -174,43 +148,41 @@ fun StatSummaryCard(totalReservations: Int, totalIncome: Double, popular: String
 }
 
 @Composable
-fun StatMiniBlock(modifier: Modifier, label: String, value: String, icon: ImageVector) {
-    Column(modifier = modifier) {
+fun StatBlockElite(label: String, value: String, icon: ImageVector) {
+    Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, modifier = Modifier.size(12.dp), tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f))
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f))
+            Icon(icon, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(label, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.4f))
         }
-        Text(value, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onPrimaryContainer)
+        Text(value, style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold), color = Color.White)
     }
 }
 
 @Composable
-fun StatListItem(title: String, subtitle: String, value: String, iconRes: Int? = null) {
-    Card(
+fun StatListItemElite(title: String, subtitle: String, value: String, iconRes: Int? = null) {
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+        shape = RoundedCornerShape(24.dp),
+        color = Color.White.copy(alpha = 0.02f),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Surface(
-                color = MaterialTheme.colorScheme.secondaryContainer,
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                color = Color(0xFF1A1633)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     if (iconRes != null) {
                         androidx.compose.foundation.Image(
                             painter = painterResource(id = iconRes),
                             contentDescription = null,
-                            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
+                            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(14.dp)),
                             contentScale = ContentScale.Crop
                         )
                     } else {
-                        Icon(Icons.Rounded.Analytics, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSecondaryContainer)
+                        Icon(Icons.Rounded.Analytics, null, tint = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -218,16 +190,11 @@ fun StatListItem(title: String, subtitle: String, value: String, iconRes: Int? =
             Spacer(modifier = Modifier.width(16.dp))
             
             Column(modifier = Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(title, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold), color = Color.White)
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.4f))
             }
             
-            Text(
-                value, 
-                style = MaterialTheme.typography.titleMedium, 
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.primary
-            )
+            Text(value, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
         }
     }
 }

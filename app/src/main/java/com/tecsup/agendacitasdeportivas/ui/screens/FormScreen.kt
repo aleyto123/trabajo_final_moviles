@@ -1,8 +1,6 @@
 package com.tecsup.agendacitasdeportivas.ui.screens
 
 import android.app.DatePickerDialog
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -17,7 +15,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.CalendarMonth
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Schedule
@@ -32,7 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.tecsup.agendacitasdeportivas.data.local.CanchaReservationEntity
 import com.tecsup.agendacitasdeportivas.data.model.CanchaProvider
 import com.tecsup.agendacitasdeportivas.ui.state.ReservationUiState
 import com.tecsup.agendacitasdeportivas.ui.viewmodel.ReservationViewModel
@@ -52,11 +48,9 @@ fun FormScreen(
     val reservationsState by viewModel.uiState.collectAsState()
     val existingReservations = (reservationsState as? ReservationUiState.Success)?.reservations ?: emptyList()
 
-    // Observar éxito de guardado para navegar al detalle
     LaunchedEffect(viewModel.lastSavedId) {
         viewModel.lastSavedId?.let { id ->
             navController.navigate("detail_screen/$id") {
-                // Limpiar el historial del formulario para que no regrese al volver atrás
                 popUpTo("cancha_list") { inclusive = false }
             }
             viewModel.lastSavedId = null
@@ -97,20 +91,24 @@ fun FormScreen(
     }
 
     Scaffold(
+        containerColor = Color(0xFF0D0B1A),
         topBar = {
             CenterAlignedTopAppBar(
                 title = { 
                     Text(
-                        if (editId == null) "Confirmar Reserva" else "Editar Reserva",
+                        if (editId == null) "Nueva Reserva" else "Editar Reserva",
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null, tint = Color.White)
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = Color.White
+                )
             )
         }
     ) { padding ->
@@ -118,11 +116,6 @@ fun FormScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
-                    )
-                )
         ) {
             Column(
                 modifier = Modifier
@@ -131,32 +124,27 @@ fun FormScreen(
                     .padding(20.dp)
             ) {
                 // Sección 1: Datos Personales
-                FormSectionHeader(icon = Icons.Rounded.Person, title = "Datos del Cliente")
+                FormSectionHeaderElite(icon = Icons.Rounded.Person, title = "Información del Cliente")
                 OutlinedTextField(
                     value = viewModel.customerName,
                     onValueChange = { viewModel.customerName = it },
                     label = { Text("Nombre Completo") },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    leadingIcon = {
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 12.dp)) {
-                            Icon(Icons.Rounded.Person, null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
-                            Spacer(Modifier.width(8.dp))
-                            VerticalDivider(modifier = Modifier.height(20.dp).padding(vertical = 2.dp), color = MaterialTheme.colorScheme.outlineVariant)
-                        }
-                    },
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = Color.White.copy(alpha = 0.4f)
                     )
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(28.dp))
 
                 // Sección 2: Fecha
-                FormSectionHeader(icon = Icons.Rounded.CalendarMonth, title = "Fecha de Reserva")
+                FormSectionHeaderElite(icon = Icons.Rounded.CalendarMonth, title = "Fecha Seleccionada")
                 val dateInteractionSource = remember { MutableInteractionSource() }
                 LaunchedEffect(dateInteractionSource) {
                     dateInteractionSource.interactions.collect {
@@ -168,30 +156,29 @@ fun FormScreen(
                     value = viewModel.reservationDate,
                     onValueChange = { },
                     readOnly = true,
-                    placeholder = { Text("Seleccione el día") },
-                    leadingIcon = {
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 12.dp)) {
-                            Icon(Icons.Rounded.CalendarMonth, null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
-                            Spacer(Modifier.width(8.dp))
-                            VerticalDivider(modifier = Modifier.height(20.dp).padding(vertical = 2.dp), color = MaterialTheme.colorScheme.outlineVariant)
-                        }
-                    },
+                    placeholder = { Text("¿Cuándo jugarás?", color = Color.White.copy(alpha = 0.4f)) },
                     interactionSource = dateInteractionSource,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
+                    )
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(28.dp))
 
                 // Sección 3: Horarios
-                FormSectionHeader(icon = Icons.Rounded.Schedule, title = "Horas Disponibles")
+                FormSectionHeaderElite(icon = Icons.Rounded.Schedule, title = "Horarios Disponibles")
                 val timeSlots = listOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00")
                 
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(85.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.heightIn(max = 300.dp)
+                    modifier = Modifier.heightIn(max = 400.dp)
                 ) {
                     items(timeSlots) { time ->
                         val isOccupied = existingReservations.any { 
@@ -202,7 +189,7 @@ fun FormScreen(
                         }
                         val isSelected = viewModel.selectedTimes.contains(time)
                         
-                        TimeSlotItem(
+                        TimeSlotItemElite(
                             time = time,
                             isSelected = isSelected,
                             isOccupied = isOccupied,
@@ -212,106 +199,70 @@ fun FormScreen(
                 }
 
                 if (errorMessage.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("⚠️ $errorMessage", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        text = "⚠️ $errorMessage", 
+                        color = Color(0xFFEF5350), 
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
                 }
                 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(40.dp))
             }
 
-            // SECCIÓN FINAL UNIFICADA
-            Box(contentAlignment = Alignment.TopEnd) {
-                Surface(
-                    tonalElevation = 8.dp,
-                    shadowElevation = 16.dp,
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+            // PIE DE PÁGINA ELITE (Glassmorphism Footer)
+            Surface(
+                color = Color.White.copy(alpha = 0.03f),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)),
+                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+                shadowElevation = 16.dp
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .navigationBarsPadding()
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(24.dp)
-                            .navigationBarsPadding()
-                    ) {
-                        val totalPrice = viewModel.hourlyPrice * viewModel.selectedTimes.size
-                        val hoursCount = viewModel.selectedTimes.size
+                    val totalPrice = viewModel.hourlyPrice * viewModel.selectedTimes.size
+                    val hoursCount = viewModel.selectedTimes.size
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(
-                                    if (hoursCount > 0) "Duración Total: $hoursCount h" else "Sin horas seleccionadas",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = if (hoursCount > 0) "S/. ${String.format("%.2f", totalPrice)}" else "Seleccione horas",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.Black,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                            
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
                             Text(
-                                "Monto a Pagar", // Cambiado de TOTAL A PAGAR para diferenciar
+                                "Monto total (${hoursCount}h)",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                letterSpacing = 1.sp
+                                color = Color.White.copy(alpha = 0.4f)
+                            )
+                            Text(
+                                text = "S/. ${String.format("%.2f", totalPrice)}",
+                                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                                color = Color.White
                             )
                         }
-
-                        Spacer(modifier = Modifier.height(20.dp))
-
+                        
                         Button(
                             onClick = {
                                 if (viewModel.isFormValid) {
                                     viewModel.save()
                                 } else {
-                                    errorMessage = "Complete todos los campos y elija al menos una hora."
+                                    errorMessage = "Por favor, elige al menos una hora."
                                 }
                             },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(64.dp),
-                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier.height(56.dp),
+                            shape = RoundedCornerShape(16.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            ),
-                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
-                        ) {
-                            Icon(Icons.Rounded.CheckCircle, contentDescription = null)
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                if (editId == null) "CONFIRMAR RESERVA" else "GUARDAR CAMBIOS",
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 0.5.sp
-                                )
+                                contentColor = Color.Black
                             )
+                        ) {
+                            Icon(Icons.Rounded.CheckCircle, null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Confirmar", fontWeight = FontWeight.Bold)
                         }
                     }
-                }
-
-                FloatingActionButton(
-                    onClick = {
-                        if (viewModel.isFormValid) {
-                            viewModel.save()
-                        } else {
-                            errorMessage = "Complete todos los campos y elija al menos una hora."
-                        }
-                    },
-                    modifier = Modifier
-                        .padding(end = 24.dp)
-                        .offset(y = (-28).dp),
-                    shape = RoundedCornerShape(16.dp),
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ) {
-                    Icon(Icons.Rounded.Check, contentDescription = "Confirmar")
                 }
             }
         }
@@ -319,65 +270,45 @@ fun FormScreen(
 }
 
 @Composable
-fun TimeSlotItem(
-    time: String,
-    isSelected: Boolean,
-    isOccupied: Boolean,
-    onToggle: () -> Unit
-) {
-    val backgroundColor = when {
-        isOccupied -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f)
-        isSelected -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.surface
-    }
-    
-    val contentColor = when {
-        isOccupied -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-        isSelected -> MaterialTheme.colorScheme.onPrimary
-        else -> MaterialTheme.colorScheme.onSurface
-    }
-    
-    val borderColor = when {
-        isOccupied -> Color.Transparent
-        isSelected -> Color.Transparent
-        else -> MaterialTheme.colorScheme.outlineVariant
-    }
-
+fun TimeSlotItemElite(time: String, isSelected: Boolean, isOccupied: Boolean, onToggle: () -> Unit) {
     Surface(
         onClick = { if (!isOccupied) onToggle() },
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = backgroundColor,
-        contentColor = contentColor,
-        border = if (borderColor != Color.Transparent) BorderStroke(1.dp, borderColor) else null
+        color = when {
+            isOccupied -> Color.White.copy(alpha = 0.02f)
+            isSelected -> MaterialTheme.colorScheme.primary
+            else -> Color.White.copy(alpha = 0.05f)
+        },
+        contentColor = when {
+            isOccupied -> Color.White.copy(alpha = 0.1f)
+            isSelected -> Color.Black
+            else -> Color.White
+        },
+        border = if (!isSelected && !isOccupied) BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)) else null
     ) {
-        Box(
-            modifier = Modifier.padding(vertical = 12.dp),
-            contentAlignment = Alignment.Center
-        ) {
+        Box(modifier = Modifier.padding(vertical = 12.dp), contentAlignment = Alignment.Center) {
             Text(
                 text = time,
                 style = MaterialTheme.typography.bodyMedium,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                textDecoration = if (isOccupied) androidx.compose.ui.text.style.TextDecoration.LineThrough else null
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
             )
         }
     }
 }
 
 @Composable
-fun FormSectionHeader(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String) {
+fun FormSectionHeaderElite(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(bottom = 12.dp, start = 4.dp)
     ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-        Spacer(modifier = Modifier.width(8.dp))
+        Icon(icon, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+        Spacer(modifier = Modifier.width(10.dp))
         Text(
             text = title,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+            color = Color.White.copy(alpha = 0.7f)
         )
     }
 }

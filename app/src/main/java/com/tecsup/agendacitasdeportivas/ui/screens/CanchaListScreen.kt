@@ -46,13 +46,14 @@ fun CanchaListScreen(navController: NavController, authViewModel: AuthViewModel?
     }
 
     Scaffold(
+        containerColor = Color(0xFF0D0B1A), // Fondo Ultra Oscuro Coherente
         topBar = {
             TopAppBar(
                 title = { 
                     Text(
                         "Canchas Pro", 
                         style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Black,
+                            fontWeight = FontWeight.Bold,
                             letterSpacing = (-0.5).sp
                         )
                     )
@@ -65,7 +66,10 @@ fun CanchaListScreen(navController: NavController, authViewModel: AuthViewModel?
                         Icon(Icons.Rounded.AccountCircle, contentDescription = "Perfil", modifier = Modifier.size(30.dp), tint = MaterialTheme.colorScheme.primary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = Color.White
+                )
             )
         }
     ) { padding ->
@@ -73,39 +77,52 @@ fun CanchaListScreen(navController: NavController, authViewModel: AuthViewModel?
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
         ) {
-            // Buscador Premium
+            // Buscador Estilo Elite
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                placeholder = { Text("Buscar cancha por nombre...") },
+                placeholder = { Text("¿Qué cancha buscas hoy?", color = Color.White.copy(alpha = 0.4f)) },
                 leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                    unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    unfocusedContainerColor = Color.White.copy(alpha = 0.03f),
+                    focusedContainerColor = Color.White.copy(alpha = 0.05f)
                 )
             )
 
-            // Filtros de Categoría
+            // Chips Premium
             LazyRow(
-                modifier = Modifier.padding(vertical = 8.dp),
+                modifier = Modifier.padding(vertical = 12.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(categories) { category ->
+                    val isSelected = selectedCategory == category
                     FilterChip(
-                        selected = selectedCategory == category,
+                        selected = isSelected,
                         onClick = { selectedCategory = category },
                         label = { Text(category) },
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(14.dp),
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = Color.Black,
+                            labelColor = Color.White.copy(alpha = 0.6f),
+                            containerColor = Color.White.copy(alpha = 0.05f)
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            enabled = true,
+                            selected = isSelected,
+                            borderColor = if (isSelected) Color.Transparent else Color.White.copy(alpha = 0.1f)
+                        )
                     )
                 }
             }
@@ -136,26 +153,29 @@ fun CanchaListScreen(navController: NavController, authViewModel: AuthViewModel?
 @Composable
 fun CanchaCard(cancha: com.tecsup.agendacitasdeportivas.data.model.Cancha, onDetailClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth().height(260.dp),
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(280.dp),
+        shape = RoundedCornerShape(28.dp),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Box {
             Image(
                 painter = painterResource(id = cancha.imageRes),
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize().alpha(0.8f),
+                modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
             
-            // Overlay de gradiente para mejorar legibilidad
+            // Gradiente Premium
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f)),
-                            startY = 100f
+                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.9f)),
+                            startY = 200f
                         )
                     )
             )
@@ -172,15 +192,14 @@ fun CanchaCard(cancha: com.tecsup.agendacitasdeportivas.data.model.Cancha, onDet
                     verticalAlignment = Alignment.Top
                 ) {
                     Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
                             text = cancha.type,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = Color.Black
                         )
                     }
                 }
@@ -188,22 +207,24 @@ fun CanchaCard(cancha: com.tecsup.agendacitasdeportivas.data.model.Cancha, onDet
                 Column {
                     Text(
                         text = cancha.name,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.ExtraBold,
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                         color = Color.White
                     )
                     
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Rounded.LocationOn, null, modifier = Modifier.size(16.dp), tint = Color.White.copy(alpha = 0.7f))
-                        Spacer(modifier = Modifier.width(4.dp))
+                    Row(
+                        modifier = Modifier.padding(top = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Rounded.LocationOn, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = cancha.address,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.7f)
+                            color = Color.White.copy(alpha = 0.6f)
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
                     
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -211,16 +232,18 @@ fun CanchaCard(cancha: com.tecsup.agendacitasdeportivas.data.model.Cancha, onDet
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column {
-                            Text("Precio por hora", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.6f))
-                            Text("S/. ${cancha.pricePerHour}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black, color = Color.White)
+                            Text("PRECIO HORA", style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp), color = Color.White.copy(alpha = 0.4f))
+                            Text("S/. ${cancha.pricePerHour}", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold), color = Color.White)
                         }
+                        
                         Button(
                             onClick = onDetailClick,
                             shape = RoundedCornerShape(16.dp),
                             colors = ButtonDefaults.buttonColors(
-                                Color(0xFF76FF03).copy(alpha = 0.55f),
+                                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
                                 contentColor = Color.White
-                            )
+                            ),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                         ) {
                             Text("Reservar", fontWeight = FontWeight.Bold)
                         }
