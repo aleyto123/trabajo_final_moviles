@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -53,7 +52,6 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Fondo con gradiente sutil
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -77,7 +75,6 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
         ) {
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Logo de la Aplicación con elevación
             Surface(
                 modifier = Modifier.size(120.dp),
                 shape = RoundedCornerShape(28.dp),
@@ -112,7 +109,6 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Card para agrupar el formulario
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(32.dp),
@@ -123,7 +119,6 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                     modifier = Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Inputs
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
@@ -168,7 +163,6 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Login Button
                     Button(
                         onClick = { authViewModel.signInWithEmail(email, password) },
                         modifier = Modifier.fillMaxWidth().height(56.dp),
@@ -177,7 +171,7 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
                     ) {
                         if (authState is AuthState.Loading) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
                         } else {
                             Text("Iniciar Sesión", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
                         }
@@ -187,7 +181,6 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Google Login - Premium Design
             OutlinedButton(
                 onClick = { authViewModel.signInWithGoogle(context) },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
@@ -196,10 +189,10 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        painter = painterResource(id = android.R.drawable.ic_menu_compass), // Icono placeholder
+                        imageVector = Icons.Rounded.VerifiedUser,
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
-                        tint = Color.Unspecified
+                        tint = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
@@ -212,7 +205,6 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Error Message
             AnimatedVisibility(visible = authState is AuthState.Error) {
                 if (authState is AuthState.Error) {
                     Text(
@@ -237,6 +229,5 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
             
             Spacer(modifier = Modifier.height(48.dp))
         }
-
     }
 }

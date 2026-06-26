@@ -1,5 +1,6 @@
 package com.tecsup.agendacitasdeportivas.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -216,7 +217,10 @@ fun CanchaCard(cancha: com.tecsup.agendacitasdeportivas.data.model.Cancha, onDet
                         Button(
                             onClick = onDetailClick,
                             shape = RoundedCornerShape(16.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                            colors = ButtonDefaults.buttonColors(
+                                Color(0xFF76FF03).copy(alpha = 0.55f),
+                                contentColor = Color.White
+                            )
                         ) {
                             Text("Reservar", fontWeight = FontWeight.Bold)
                         }

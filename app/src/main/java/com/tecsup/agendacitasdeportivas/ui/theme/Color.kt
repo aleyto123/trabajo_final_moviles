@@ -3,10 +3,14 @@ package com.tecsup.agendacitasdeportivas.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val SportsGreenPrimary = Color(0xFF76FF03)
-val SportsGreenSecondary = Color(0xFF00E676)
+val SportsGreenSecondary = Color(0xFF32DA37)
 val SportsGreenTertiary = Color(0xFF1DE9B6)
 
-val SportsGreenDarkPrimary = Color(0xFF64DD17)
+// --- CONFIGURACIÓN DE INTENSIDAD MANUAL ---
+// Cambia este valor (de 0.0f a 1.0f) para ajustar la transparencia de todo lo verde
+const val GREEN_INTENSITY = 1.0f
+
+val SportsGreenDarkPrimary = Color(0xFF62FF00)
 val SportsGreenDarkSecondary = Color(0xFF00C853)
 val SportsGreenDarkTertiary = Color(0xFF00BFA5)
 

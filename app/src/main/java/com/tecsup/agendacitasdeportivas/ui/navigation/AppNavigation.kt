@@ -34,7 +34,7 @@ fun AppNavigation(
             RegisterScreen(navController, authViewModel)
         }
         composable("profile") {
-            ProfileScreen(navController, authViewModel)
+            ProfileScreen(navController, authViewModel, reservationViewModel)
         }
         composable("cancha_list") {
             CanchaListScreen(navController, authViewModel)

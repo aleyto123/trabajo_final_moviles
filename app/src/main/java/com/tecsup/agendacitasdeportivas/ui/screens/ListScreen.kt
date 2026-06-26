@@ -1,7 +1,9 @@
 package com.tecsup.agendacitasdeportivas.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,6 +30,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.tecsup.agendacitasdeportivas.data.local.CanchaReservationEntity
 import com.tecsup.agendacitasdeportivas.data.model.CanchaProvider
@@ -109,76 +112,126 @@ fun ListScreen(navController: NavController, viewModel: ReservationViewModel) {
 @Composable
 fun ReservationItem(reservation: CanchaReservationEntity, onClick: () -> Unit) {
     val cancha = CanchaProvider.allCanchas.find { it.name == reservation.canchaType }
+    val statusColor = if (reservation.estado == "Confirmada") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
 
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 1.dp,
+        shadowElevation = 2.dp,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (cancha != null) {
-                Image(
-                    painter = painterResource(id = cancha.imageRes),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
+            // Imagen con estilo circular y borde
+            Box(contentAlignment = Alignment.Center) {
+                if (cancha != null) {
+                    Image(
+                        painter = painterResource(id = cancha.imageRes),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(70.dp)
+                            .clip(CircleShape)
+                            .border(2.dp, MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = CircleShape,
+                        modifier = Modifier.size(70.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.Rounded.SportsSoccer, 
+                                contentDescription = null, 
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
+                }
+                
+                // Badge de estado pequeño
                 Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
+                    color = statusColor,
+                    modifier = Modifier
+                        .size(16.dp)
+                        .align(Alignment.BottomEnd)
+                        .padding(2.dp),
                     shape = CircleShape,
-                    modifier = Modifier.size(64.dp)
+                    border = BorderStroke(2.dp, Color.White)
+                ) {}
+            }
+            
+            Spacer(modifier = Modifier.width(18.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = reservation.canchaType, 
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 0.5.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                
+                Spacer(modifier = Modifier.height(6.dp))
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Rounded.Person, 
+                        contentDescription = null, 
+                        modifier = Modifier.size(14.dp), 
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = reservation.customerName, 
+                        style = MaterialTheme.typography.bodyMedium, 
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
                         Icon(
-                            Icons.Rounded.SportsSoccer, 
+                            Icons.Rounded.CalendarToday, 
                             contentDescription = null, 
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            modifier = Modifier.size(12.dp), 
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "${reservation.reservationDate} • ${reservation.reservationTime}",
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     }
                 }
             }
             
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = reservation.canchaType, 
-                    style = MaterialTheme.typography.titleMedium, 
-                    fontWeight = FontWeight.ExtraBold
+            IconButton(onClick = onClick) {
+                Icon(
+                    Icons.AutoMirrored.Rounded.ArrowForward, 
+                    contentDescription = null, 
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                 )
-                Spacer(modifier = Modifier.height(2.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Rounded.Person, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(text = reservation.customerName, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                Spacer(modifier = Modifier.height(2.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Rounded.CalendarToday, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "${reservation.reservationDate} • ${reservation.reservationTime}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                    )
-                }
             }
-            
-            Icon(
-                Icons.AutoMirrored.Rounded.ArrowForward, 
-                contentDescription = null, 
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
-            )
         }
     }
 }

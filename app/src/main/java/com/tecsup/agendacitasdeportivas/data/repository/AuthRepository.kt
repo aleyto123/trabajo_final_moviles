@@ -10,6 +10,7 @@ interface AuthRepository {
     suspend fun signUpWithEmail(email: String, pass: String): Result<AuthResult>
     suspend fun signInWithEmail(email: String, pass: String): Result<AuthResult>
     suspend fun signInWithCredential(credential: AuthCredential): Result<AuthResult>
+    suspend fun updateDisplayName(name: String): Result<Unit>
     fun signOut()
     fun isUserLoggedIn(): Boolean
 }

@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -36,7 +37,6 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
     val authState by authViewModel.authState.collectAsState()
     val currentUser by authViewModel.currentUser.collectAsState()
 
-    // Redirigir automáticamente al historial/lista de canchas al registrarse con éxito
     LaunchedEffect(currentUser) {
         if (currentUser != null) {
             navController.navigate("cancha_list") {
@@ -88,7 +88,8 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Card para el formulario de registro
+
+            // Registro con Card (Diseño original)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(32.dp),
@@ -99,7 +100,6 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
                     modifier = Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Correo
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
@@ -117,7 +117,6 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Contraseña
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
@@ -144,7 +143,6 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Confirmar
                     OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it },
@@ -163,11 +161,12 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // Register Button
                     Button(
                         onClick = {
                             if (email.isBlank() || password.isBlank()) {
                                 authViewModel.setError("Por favor, completa todos los campos.")
+                            } else if (password.length < 6) {
+                                authViewModel.setError("Tu contraseña es demasiado corta. Debe tener al menos 6 caracteres para ser segura. 🔒")
                             } else if (password != confirmPassword) {
                                 authViewModel.setError("Las contraseñas no coinciden.")
                             } else {
@@ -180,7 +179,7 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
                     ) {
                         if (authState is AuthState.Loading) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
                         } else {
                             Text("Registrarse", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
                         }
@@ -190,7 +189,7 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Error display
+            // Mensajes de Error (Estilo original como pidió el usuario)
             AnimatedVisibility(visible = authState is AuthState.Error) {
                 if (authState is AuthState.Error) {
                     Text(

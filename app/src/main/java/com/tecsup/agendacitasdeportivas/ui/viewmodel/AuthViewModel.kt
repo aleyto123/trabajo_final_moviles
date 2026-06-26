@@ -123,14 +123,31 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
+    fun updateName(newName: String) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            repository.updateDisplayName(newName)
+                .onSuccess {
+                    _authState.value = AuthState.Success
+                }
+                .onFailure { e ->
+                    _authState.value = AuthState.Error(translateError(e))
+                }
+        }
+    }
+
     private fun translateError(e: Throwable): String {
         val message = e.message ?: ""
         return when {
-            message.contains("WEAK_PASSWORD") -> "Contraseña muy corta (mínimo 6)."
-            message.contains("INVALID_CREDENTIALS") -> "Datos incorrectos."
-            message.contains("EMAIL_ALREADY_IN_USE") -> "El correo ya está registrado."
-            message.contains("10:") -> "Error de red o SHA-1 no reconocido por Google."
-            else -> "Error: ${e.localizedMessage ?: "desconocido"}"
+            message.contains("network error", ignoreCase = true) ||
+            message.contains("timeout", ignoreCase = true) ||
+            message.contains("unreachable", ignoreCase = true) -> 
+                "No se pudo conectar. Revisa tu conexión a internet e inténtalo de nuevo. 📶"
+            message.contains("WEAK_PASSWORD") -> "Tu contraseña es demasiado débil. Usa al menos 6 caracteres. 🔒"
+            message.contains("INVALID_CREDENTIALS") -> "Los datos ingresados no son correctos. Verifica tu correo o contraseña."
+            message.contains("EMAIL_ALREADY_IN_USE") -> "Este correo electrónico ya está registrado con otra cuenta."
+            message.contains("10:") -> "Error de conexión con Google. Verifica tu red."
+            else -> "Ocurrió un error inesperado: ${e.localizedMessage ?: "inténtalo más tarde"}"
         }
     }
 }
